@@ -755,6 +755,42 @@ document.querySelector("#loginClose").addEventListener("click", () => {
   history.replaceState(null, "", `${location.pathname}${location.hash}`);
 });
 
+document.querySelector("#resetPasswordForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const password = document.querySelector("#newPassword").value;
+  const confirmation = document.querySelector("#confirmPassword").value;
+  const errorBox = document.querySelector("#resetPasswordError");
+  const submit = document.querySelector("#resetPasswordSubmit");
+  errorBox.hidden = true;
+  if (password !== confirmation) {
+    errorBox.textContent = "รหัสผ่านทั้งสองช่องไม่ตรงกัน";
+    errorBox.hidden = false;
+    return;
+  }
+  submit.disabled = true;
+  submit.textContent = "กำลังบันทึก...";
+  const { error } = await supabaseClient.auth.updateUser({ password });
+  if (error) {
+    errorBox.textContent = `ตั้งรหัสผ่านไม่สำเร็จ: ${error.message}`;
+    errorBox.hidden = false;
+    submit.disabled = false;
+    submit.textContent = "บันทึกรหัสผ่านใหม่";
+    return;
+  }
+  document.querySelector("#resetPasswordDialog").close();
+  MANAGE_MODE = true;
+  applyAccessMode();
+  history.replaceState(null, "", `${location.pathname}?manage=1`);
+  toast("ตั้งรหัสผ่านใหม่สำเร็จและเข้าสู่ระบบแล้ว");
+});
+
+supabaseClient?.auth.onAuthStateChange((event) => {
+  if (event === "PASSWORD_RECOVERY") {
+    document.querySelector("#loginDialog").close();
+    document.querySelector("#resetPasswordDialog").showModal();
+  }
+});
+
 document.querySelector("#logoutBtn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   MANAGE_MODE = false;

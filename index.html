@@ -313,6 +313,20 @@
     </form>
   </dialog>
 
+  <dialog class="login-dialog" id="resetPasswordDialog">
+    <form id="resetPasswordForm">
+      <p class="mono-label">account.recovery</p>
+      <h2>ตั้งรหัสผ่านใหม่</h2>
+      <p>กรอกรหัสผ่านใหม่อย่างน้อย 8 ตัวอักษร แล้วใช้รหัสนี้เข้าสู่หน้าแก้ไข</p>
+      <label for="newPassword">รหัสผ่านใหม่</label>
+      <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required>
+      <label for="confirmPassword">ยืนยันรหัสผ่านใหม่</label>
+      <input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
+      <p class="login-error" id="resetPasswordError" role="alert" hidden></p>
+      <button class="btn primary login-submit" id="resetPasswordSubmit" type="submit">บันทึกรหัสผ่านใหม่</button>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
