@@ -56,6 +56,15 @@ body.manager-mode .period-fields { display: grid; }
 .period-fields label { color: #aaa89f; font-size: 10px; }
 .period-fields input { width: 100%; min-height: 36px; margin-top: 3px; padding: 5px 6px; border: 1px solid #484942; border-radius: 6px; background: var(--dark-3); color: white; color-scheme: dark; font: 10px "JetBrains Mono", monospace; }
 .period-fields input:focus { outline: 2px solid rgba(100,185,168,.35); border-color: var(--teal); }
+.publish-toggle { align-items: center; gap: 9px; margin-top: 11px; padding: 9px; border-radius: 8px; background: #11120f; cursor: pointer; }
+body.manager-mode .publish-toggle { display: flex; }
+.publish-toggle input { width: 18px; height: 18px; accent-color: var(--teal); }
+.publish-toggle b, .publish-toggle small { display: block; }
+.publish-toggle b { color: var(--canvas); font-size: 12px; }
+.publish-toggle small { color: #8f8e86; font-size: 9px; }
+body.single-published-round.viewer-mode .round-switch { display: none; }
+.round-btn[hidden] { display: none; }
+.round-switch:has(.round-btn[hidden]) { grid-template-columns: 1fr; }
 .year-label { display: block; margin-top: 14px; color: #929087; font-size: 11px; }
 .year-input { width: 100%; padding: 4px 0; border: 0; border-bottom: 1px solid #44453e; background: transparent; color: var(--canvas); font: 500 15px "JetBrains Mono", monospace; }
 .main-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 30px; }

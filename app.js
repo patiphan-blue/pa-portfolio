@@ -17,6 +17,7 @@ const defaults = {
     1: { start: "2025-10-01", end: "2026-03-31" },
     2: { start: "2026-04-01", end: "2026-09-30" }
   },
+  roundVisibility: { 1: true, 2: false },
   fields: {
     title: "ครูผู้สร้างการเรียนรู้",
     intro: "รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง",
@@ -118,7 +119,8 @@ function loadState() {
       ...saved,
       fields: { ...defaults.fields, ...(saved.fields || {}) },
       rounds: { 1: { ...defaults.rounds[1], ...(saved.rounds?.[1] || {}) }, 2: { ...defaults.rounds[2], ...(saved.rounds?.[2] || {}) } },
-      roundPeriods: { 1: { ...defaults.roundPeriods[1], ...(saved.roundPeriods?.[1] || {}) }, 2: { ...defaults.roundPeriods[2], ...(saved.roundPeriods?.[2] || {}) } }
+      roundPeriods: { 1: { ...defaults.roundPeriods[1], ...(saved.roundPeriods?.[1] || {}) }, 2: { ...defaults.roundPeriods[2], ...(saved.roundPeriods?.[2] || {}) } },
+      roundVisibility: { ...defaults.roundVisibility, ...(saved.roundVisibility || {}) }
     } : structuredClone(defaults);
     const oldTitles = [
       "พัฒนาทักษะการคิดเชิงคำนวณ ด้วยการเรียนรู้แบบ Project-based Learning",
@@ -138,11 +140,31 @@ function saveState() {
   status.classList.add("saving");
   status.lastChild.textContent = "กำลังบันทึก";
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
+  saveTimer = setTimeout(async () => {
     localStorage.setItem(APP_KEY, JSON.stringify(state));
+    if (MANAGE_MODE && supabaseClient) {
+      const { error } = await supabaseClient.from("pa_settings").upsert({ id: "portfolio", data: state, updated_at: new Date().toISOString() });
+      if (error) {
+        console.error(error);
+        status.lastChild.textContent = "บันทึกออนไลน์ไม่สำเร็จ";
+        return;
+      }
+    }
     status.classList.remove("saving");
     status.lastChild.textContent = "บันทึกแล้ว";
   }, 280);
+}
+
+async function loadRemoteState() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.from("pa_settings").select("data").eq("id", "portfolio").maybeSingle();
+  if (error) return;
+  if (!data?.data) {
+    if (MANAGE_MODE) await supabaseClient.from("pa_settings").upsert({ id: "portfolio", data: state, updated_at: new Date().toISOString() });
+    return;
+  }
+  localStorage.setItem(APP_KEY, JSON.stringify(data.data));
+  state = loadState();
 }
 
 function openDB() {
@@ -249,7 +271,14 @@ function formatPeriod(round) {
 function applyState() {
   document.querySelector("#yearInput").value = state.year;
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = state.year);
-  document.querySelectorAll(".round-btn").forEach(btn => btn.classList.toggle("active", Number(btn.dataset.round) === state.round));
+  const publishedRounds = [1, 2].filter(round => state.roundVisibility[round]);
+  document.body.classList.toggle("single-published-round", publishedRounds.length === 1);
+  document.querySelectorAll(".round-btn").forEach(btn => {
+    const round = Number(btn.dataset.round);
+    btn.hidden = !MANAGE_MODE && !state.roundVisibility[round];
+    btn.classList.toggle("active", round === state.round);
+  });
+  document.querySelector("#roundPublishedInput").checked = Boolean(state.roundVisibility[state.round]);
   document.querySelectorAll("[data-round-label]").forEach(el => el.textContent = `รอบที่ ${state.round}`);
   document.querySelectorAll("[data-period-label]").forEach(el => el.textContent = formatPeriod(state.round));
   document.querySelectorAll("[data-period-round]").forEach(el => el.textContent = formatPeriod(Number(el.dataset.periodRound)));
@@ -712,6 +741,19 @@ document.querySelector("#roundEndInput").addEventListener("change", event => {
   toast(`บันทึกวันสิ้นสุดรอบที่ ${state.round} แล้ว`);
 });
 
+document.querySelector("#roundPublishedInput").addEventListener("change", event => {
+  if (!MANAGE_MODE) return;
+  const otherRound = state.round === 1 ? 2 : 1;
+  if (!event.target.checked && !state.roundVisibility[otherRound]) {
+    event.target.checked = true;
+    return toast("ต้องเปิดเผยแพร่อย่างน้อย 1 รอบ");
+  }
+  state.roundVisibility[state.round] = event.target.checked;
+  saveState();
+  applyState();
+  toast(event.target.checked ? `เปิดเผยแพร่รอบที่ ${state.round} แล้ว` : `ซ่อนรอบที่ ${state.round} จากกรรมการแล้ว`);
+});
+
 document.querySelector("#evidenceUpload").addEventListener("change", event => {
   if (MANAGE_MODE) handleFiles(event.target.files);
   event.target.value = "";
@@ -786,6 +828,7 @@ document.querySelector("#loginForm").addEventListener("submit", async event => {
   }
   MANAGE_MODE = true;
   applyAccessMode();
+  applyState();
   document.querySelector("#loginPassword").value = "";
   document.querySelector("#loginDialog").close();
   submit.disabled = false;
@@ -839,6 +882,8 @@ document.querySelector("#logoutBtn").addEventListener("click", async () => {
   MANAGE_MODE = false;
   setEditMode(false);
   applyAccessMode();
+  if (!state.roundVisibility[state.round]) state.round = state.roundVisibility[1] ? 1 : 2;
+  applyState();
   history.replaceState(null, "", `${location.pathname}${location.hash}`);
   toast("ออกจากระบบแล้ว");
 });
@@ -883,6 +928,10 @@ async function init() {
     else toast("ลิงก์ตั้งรหัสผ่านไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่");
   }
   if (REQUESTED_MANAGE_MODE) await openManagerLogin();
+  await loadRemoteState();
+  if (!MANAGE_MODE && !state.roundVisibility[state.round]) {
+    state.round = state.roundVisibility[1] ? 1 : 2;
+  }
   renderCriteria();
   try {
     evidence = [...(await getUploadedEvidence()), ...seedEvidence];
