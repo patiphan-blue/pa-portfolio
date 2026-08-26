@@ -2,6 +2,7 @@ const APP_KEY = "pa-dev-data-v1";
 const DB_NAME = "pa-dev-images";
 const DB_STORE = "images";
 const REQUESTED_MANAGE_MODE = new URLSearchParams(location.search).get("manage") === "1";
+const REQUESTED_PASSWORD_RESET = new URLSearchParams(location.search).get("reset") === "1" || location.hash.includes("type=recovery");
 const SUPABASE_URL = "https://poijccexkyppwlutpwsf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_CUamprk3CTpeh6sVIFunxw_wYo2JPNi";
 const STORAGE_BUCKET = "evidence-images";
@@ -12,6 +13,10 @@ let MANAGE_MODE = false;
 const defaults = {
   year: "2568",
   round: 1,
+  roundPeriods: {
+    1: { start: "2025-10-01", end: "2026-03-31" },
+    2: { start: "2026-04-01", end: "2026-09-30" }
+  },
   fields: {
     title: "ครูผู้สร้างการเรียนรู้",
     intro: "รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง",
@@ -112,7 +117,8 @@ function loadState() {
       ...structuredClone(defaults),
       ...saved,
       fields: { ...defaults.fields, ...(saved.fields || {}) },
-      rounds: { 1: { ...defaults.rounds[1], ...(saved.rounds?.[1] || {}) }, 2: { ...defaults.rounds[2], ...(saved.rounds?.[2] || {}) } }
+      rounds: { 1: { ...defaults.rounds[1], ...(saved.rounds?.[1] || {}) }, 2: { ...defaults.rounds[2], ...(saved.rounds?.[2] || {}) } },
+      roundPeriods: { 1: { ...defaults.roundPeriods[1], ...(saved.roundPeriods?.[1] || {}) }, 2: { ...defaults.roundPeriods[2], ...(saved.roundPeriods?.[2] || {}) } }
     } : structuredClone(defaults);
     const oldTitles = [
       "พัฒนาทักษะการคิดเชิงคำนวณ ด้วยการเรียนรู้แบบ Project-based Learning",
@@ -228,11 +234,27 @@ async function getPublicProfile() {
   return supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(`profile/${data[0].name}`).data.publicUrl;
 }
 
+function formatThaiDate(isoDate) {
+  if (!isoDate) return "ยังไม่กำหนดวันที่";
+  return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "numeric" })
+    .format(new Date(`${isoDate}T00:00:00`));
+}
+
+function formatPeriod(round) {
+  const period = state.roundPeriods?.[round];
+  if (!period?.start || !period?.end) return "ยังไม่กำหนดช่วงเวลา";
+  return `${formatThaiDate(period.start)} – ${formatThaiDate(period.end)}`;
+}
+
 function applyState() {
   document.querySelector("#yearInput").value = state.year;
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = state.year);
   document.querySelectorAll(".round-btn").forEach(btn => btn.classList.toggle("active", Number(btn.dataset.round) === state.round));
   document.querySelectorAll("[data-round-label]").forEach(el => el.textContent = `รอบที่ ${state.round}`);
+  document.querySelectorAll("[data-period-label]").forEach(el => el.textContent = formatPeriod(state.round));
+  document.querySelectorAll("[data-period-round]").forEach(el => el.textContent = formatPeriod(Number(el.dataset.periodRound)));
+  document.querySelector("#roundStartInput").value = state.roundPeriods[state.round].start;
+  document.querySelector("#roundEndInput").value = state.roundPeriods[state.round].end;
   document.querySelectorAll(".timeline-item").forEach((el, i) => el.classList.toggle("active", i + 1 === state.round));
   const track = document.querySelector(".timeline-track i");
   if (track) track.style.transform = state.round === 2 ? "translateX(100%) translateY(-1px)" : "translateY(-1px)";
@@ -669,6 +691,27 @@ document.querySelector("#yearInput").addEventListener("input", event => {
   saveState();
 });
 
+document.querySelector("#roundStartInput").addEventListener("change", event => {
+  if (!MANAGE_MODE) return;
+  state.roundPeriods[state.round].start = event.target.value;
+  saveState();
+  applyState();
+  toast(`บันทึกวันเริ่มต้นรอบที่ ${state.round} แล้ว`);
+});
+
+document.querySelector("#roundEndInput").addEventListener("change", event => {
+  if (!MANAGE_MODE) return;
+  const period = state.roundPeriods[state.round];
+  if (event.target.value && period.start && event.target.value < period.start) {
+    event.target.value = period.end;
+    return toast("วันสิ้นสุดต้องอยู่หลังวันเริ่มต้น");
+  }
+  period.end = event.target.value;
+  saveState();
+  applyState();
+  toast(`บันทึกวันสิ้นสุดรอบที่ ${state.round} แล้ว`);
+});
+
 document.querySelector("#evidenceUpload").addEventListener("change", event => {
   if (MANAGE_MODE) handleFiles(event.target.files);
   event.target.value = "";
@@ -834,6 +877,11 @@ function updateClock() {
 
 async function init() {
   applyAccessMode();
+  if (REQUESTED_PASSWORD_RESET) {
+    const { data } = await supabaseClient.auth.getSession();
+    if (data.session) document.querySelector("#resetPasswordDialog").showModal();
+    else toast("ลิงก์ตั้งรหัสผ่านไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่");
+  }
   if (REQUESTED_MANAGE_MODE) await openManagerLogin();
   renderCriteria();
   try {

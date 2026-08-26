@@ -30,6 +30,14 @@
           <button class="round-btn active" data-round="1" type="button">รอบ 1</button>
           <button class="round-btn" data-round="2" type="button">รอบ 2</button>
         </div>
+        <div class="cycle-period" aria-live="polite">
+          <span>ช่วงเวลาประเมิน</span>
+          <strong data-period-label></strong>
+        </div>
+        <div class="period-fields manager-only">
+          <label>เริ่มต้น<input id="roundStartInput" type="date"></label>
+          <label>สิ้นสุด<input id="roundEndInput" type="date"></label>
+        </div>
         <label class="year-label" for="yearInput">ปีงบประมาณ</label>
         <input id="yearInput" class="year-input" inputmode="numeric" value="2568" aria-label="ปีงบประมาณ">
       </div>
@@ -69,7 +77,7 @@
         <section class="page-section active" id="overview" data-title="ภาพรวม">
           <div class="hero">
             <div class="hero-copy">
-              <div class="status-line"><span></span>แฟ้มประเมินพร้อมใช้งาน · <b data-round-label>รอบที่ 1</b></div>
+              <div class="status-line"><span></span>แฟ้มประเมินพร้อมใช้งาน · <b data-round-label>รอบที่ 1</b> · <b data-period-label></b></div>
               <p class="hero-code" aria-hidden="true">const teacher = {</p>
               <h1><span class="editable" data-field="title">ครูผู้สร้างการเรียนรู้</span><br><em>ด้วยเทคโนโลยี</em></h1>
               <p class="hero-lead editable" data-field="intro">รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง</p>
@@ -100,7 +108,7 @@
           </div>
 
           <div class="overview-strip">
-            <article><span>รอบปัจจุบัน</span><strong data-round-label>รอบที่ 1</strong><small>ปีงบประมาณ <span data-year>2568</span></small></article>
+            <article><span>รอบปัจจุบัน</span><strong data-round-label>รอบที่ 1</strong><small><span data-period-label></span> · ปีงบประมาณ <span data-year>2568</span></small></article>
             <article><span>กลุ่มสาระ</span><strong>วิทยาศาสตร์ฯ</strong><small>เทคโนโลยี · วิทยาการคำนวณ</small></article>
             <article><span>หลักฐานในแฟ้ม</span><strong id="evidenceCount">12 รายการ</strong><small>ภาพกิจกรรมและเอกสาร</small></article>
             <article class="progress-article"><span>ความพร้อมนำเสนอ</span><strong>สมบูรณ์</strong><div class="progress"><i></i></div></article>
@@ -116,10 +124,10 @@
           <div class="timeline">
             <div class="timeline-track"><i></i></div>
             <article class="timeline-item active">
-              <span>01</span><div><small>รอบที่ 1 · ต.ค.–มี.ค.</small><h3>วางระบบและสร้างพื้นฐาน</h3><p>กำหนดข้อตกลง พัฒนาสื่อ ทดลองใช้ และเก็บข้อมูลระหว่างทาง</p></div>
+              <span>01</span><div><small>รอบที่ 1 · <span data-period-round="1"></span></small><h3>วางระบบและสร้างพื้นฐาน</h3><p>กำหนดข้อตกลง พัฒนาสื่อ ทดลองใช้ และเก็บข้อมูลระหว่างทาง</p></div>
             </article>
             <article class="timeline-item">
-              <span>02</span><div><small>รอบที่ 2 · เม.ย.–ก.ย.</small><h3>ต่อยอดและสรุปผลลัพธ์</h3><p>ปรับปรุงกระบวนการ วิเคราะห์ผล และขยายผลสู่ชุมชนการเรียนรู้</p></div>
+              <span>02</span><div><small>รอบที่ 2 · <span data-period-round="2"></span></small><h3>ต่อยอดและสรุปผลลัพธ์</h3><p>ปรับปรุงกระบวนการ วิเคราะห์ผล และขยายผลสู่ชุมชนการเรียนรู้</p></div>
             </article>
           </div>
         </section>
