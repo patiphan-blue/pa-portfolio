@@ -20,16 +20,20 @@ const defaults = {
   roundVisibility: { 1: true, 2: false },
   fields: {
     title: "ครูผู้สร้างการเรียนรู้",
-    intro: "รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง",
+    intro: "ครูคอมพิวเตอร์ผู้จัดการเรียนรู้ผ่านการลงมือปฏิบัติจริง มุ่งพัฒนาทักษะการเขียนโปรแกรม วงจรอิเล็กทรอนิกส์ และการใช้ AI อย่างมีวิจารณญาณ",
     name: "นายปฏิภาณ ใจซื่อ",
     role: "ครู",
     roleLong: "ตำแหน่ง ครู · กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี",
     school: "โรงเรียนปายวิทยาคาร",
     subject: "วิทยาการคำนวณ",
     affiliation: "สพม.แม่ฮ่องสอน",
-    salary: "21,100 บาท",
+    salary: "21,790 บาท",
     academicRank: "—",
-    hours: "18 ชั่วโมง",
+    hours: "20 ชั่วโมง",
+    qualification: "ครุศาสตรบัณฑิต สาขาวิชาคอมพิวเตอร์ศึกษา",
+    university: "มหาวิทยาลัยราชภัฏเชียงใหม่",
+    appointmentDate: "9 พฤศจิกายน 2566",
+    teachingLevels: "มัธยมศึกษาปีที่ 1, 3, 5 และ 6",
     supportHours: "กรอกจำนวนชั่วโมง/สัปดาห์",
     schoolDevelopmentHours: "กรอกจำนวนชั่วโมง/สัปดาห์",
     policyHours: "กรอกจำนวนชั่วโมง/สัปดาห์"
@@ -131,6 +135,9 @@ function loadState() {
         merged.rounds[round] = { ...defaults.rounds[round] };
       }
     });
+    if (merged.fields.salary === "21,100 บาท") merged.fields.salary = defaults.fields.salary;
+    if (merged.fields.hours === "18 ชั่วโมง") merged.fields.hours = defaults.fields.hours;
+    if (merged.fields.intro === "รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง") merged.fields.intro = defaults.fields.intro;
     return merged;
   } catch { return structuredClone(defaults); }
 }
@@ -165,6 +172,7 @@ async function loadRemoteState() {
   }
   localStorage.setItem(APP_KEY, JSON.stringify(data.data));
   state = loadState();
+  if (MANAGE_MODE) await supabaseClient.from("pa_settings").upsert({ id: "portfolio", data: state, updated_at: new Date().toISOString() });
 }
 
 function openDB() {
