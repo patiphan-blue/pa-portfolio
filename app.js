@@ -448,7 +448,9 @@ function moveCarousel(direction) {
 }
 
 function renderChallengePreview() {
-  const items = evidence.filter(item => item.round === state.round && item.category === "challenge");
+  const items = evidence
+    .filter(item => item.round === state.round && item.category === "challenge")
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   document.querySelector("#challengePreview").innerHTML = items.length
     ? items.map((item, index) => `<button class="story-photo story-photo-${(index % 6) + 1}" type="button" data-preview-id="${item.id}" aria-label="เปิดภาพประกอบลำดับที่ ${index + 1} แบบเต็มจอ"><img src="${item.src}" alt="ภาพประกอบประเด็นท้าทายลำดับที่ ${index + 1}" loading="lazy"><span>${String(index + 1).padStart(2, "0")}</span></button>`).join("")
     : `<div class="challenge-preview-empty">ยังไม่มีภาพประกอบในรอบที่ ${state.round}</div>`;
