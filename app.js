@@ -11,7 +11,7 @@ const supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY)
 let MANAGE_MODE = false;
 
 const defaults = {
-  year: "2568",
+  year: "2569",
   round: 1,
   roundPeriods: {
     1: { start: "2025-10-01", end: "2026-03-31" },
@@ -57,11 +57,11 @@ const defaults = {
     }
   },
   schedule: [
-    ["จันทร์", "ว31103 ม.4/1", "ว31103 ม.4/1", "—", "ว32103 ม.5/2", "ชุมนุม", "PLC"],
-    ["อังคาร", "ว32103 ม.5/1", "ว32103 ม.5/1", "ว31103 ม.4/2", "ว31103 ม.4/2", "—", "งานระบบ"],
-    ["พุธ", "—", "ว33103 ม.6/1", "ว33103 ม.6/1", "โฮมรูม", "กิจกรรม", "กิจกรรม"],
-    ["พฤหัสบดี", "ว31103 ม.4/3", "ว31103 ม.4/3", "—", "ว32103 ม.5/3", "ว32103 ม.5/3", "PLC"],
-    ["ศุกร์", "ว33103 ม.6/2", "ว33103 ม.6/2", "แนะแนว", "—", "ซ่อมเสริม", "ซ่อมเสริม"]
+    ["จันทร์", "จริยธรรม", "ว23182 ม.3/1 · 2105", "ว23182 ม.3/4 · 2105", "พักกลางวัน", "ว23182 ม.3/3 · 2105", "ว30298 ม.6/2 · 2105", "ว30298 ม.6/2 · 2105", "—", "ส33205 · โฮมรูม", "PLC"],
+    ["อังคาร", "ว21205 ม.1/1 · 1103–4", "ว21205 ม.1/1 · 1103–4", "ว23182 ม.3/2 · 2105", "พักกลางวัน", "—", "—", "ว23182 ม.3/6 · 2105", "ว23182 ม.3/5 · 2105", "สวนพฤกษศาสตร์", "PLC"],
+    ["พุธ", "ว30298 ม.6/2 · 2105", "ว30298 ม.6/2 · 2105", "—", "พักกลางวัน", "—", "—", "ว30275 ม.5/3 · 2105", "ว30275 ม.5/3 · 2105", "ชุมนุม", "—"],
+    ["พฤหัสบดี", "—", "—", "—", "พักกลางวัน", "—", "—", "—", "—", "ยุวกาชาด ม.4", "—"],
+    ["ศุกร์", "ว21205 ม.1/1 · 1103–4", "ว21205 ม.1/1 · 1103–4", "—", "พักกลางวัน", "—", "ว23182 ม.3/8 · 2105", "ว23182 ม.3/7 · 2105", "I20201 / I30201 / ส23205", "I20201 / I30201 / ส23205", "—"]
   ],
   hiddenCriterionSeeds: { 1: {}, 2: {} }
 };
@@ -138,6 +138,10 @@ function loadState() {
     if (merged.fields.salary === "21,100 บาท") merged.fields.salary = defaults.fields.salary;
     if (merged.fields.hours === "18 ชั่วโมง") merged.fields.hours = defaults.fields.hours;
     if (merged.fields.intro === "รายงานผลการพัฒนางานตามข้อตกลง เพื่อยกระดับการเรียนรู้วิทยาการคำนวณผ่านการลงมือสร้างจริง") merged.fields.intro = defaults.fields.intro;
+    if (merged.year === "2568") merged.year = defaults.year;
+    if (!Array.isArray(merged.schedule) || merged.schedule.some(row => row.length < 11) || merged.schedule.some(row => row.some(cell => String(cell).includes("ว31103")))) {
+      merged.schedule = structuredClone(defaults.schedule);
+    }
     return merged;
   } catch { return structuredClone(defaults); }
 }
@@ -308,7 +312,7 @@ function applyState() {
 
 function renderSchedule() {
   document.querySelector("#scheduleBody").innerHTML = state.schedule.map((row, rowIndex) =>
-    `<tr>${row.map((cell, colIndex) => `<td class="subject-cell" data-row="${rowIndex}" data-col="${colIndex}" ${editMode ? 'contenteditable="true"' : ""}>${escapeHTML(cell)}</td>`).join("")}</tr>`
+    `<tr>${row.map((cell, colIndex) => `<td class="subject-cell${cell === "พักกลางวัน" ? " is-break" : cell === "—" ? " is-empty" : ""}" data-row="${rowIndex}" data-col="${colIndex}" ${editMode ? 'contenteditable="true"' : ""}>${escapeHTML(cell)}</td>`).join("")}</tr>`
   ).join("");
 }
 
