@@ -401,12 +401,11 @@ function renderGallery() {
   const gallery = document.querySelector("#gallery");
   gallery.innerHTML = current.map(item => `
     <article class="gallery-item" data-id="${item.id}">
-      <img src="${item.src}" alt="${escapeHTML(item.title)}" data-gallery-image>
+      <img src="${item.src}" alt="ภาพหลักฐานลำดับที่ ${current.indexOf(item) + 1}" data-gallery-image>
       <div class="gallery-controls">
         <button type="button" data-rename="${item.id}" aria-label="เปลี่ยนชื่อ">✎</button>
         ${item.seed ? "" : `<button type="button" data-delete="${item.id}" aria-label="ลบภาพ">×</button>`}
       </div>
-      <div class="gallery-caption"><strong>${escapeHTML(item.title)}</strong><span>${categoryLabel(item.category)} · รอบ ${item.round}</span></div>
     </article>`).join("");
   document.querySelector("#galleryCount").textContent = `${current.length} รายการ`;
   document.querySelector("#emptyState").hidden = current.length > 0;
@@ -421,8 +420,8 @@ function renderCarousel() {
   carouselIndex = Math.min(carouselIndex, Math.max(0, items.length - 1));
   document.querySelector("#carouselTrack").innerHTML = items.map((item, index) => `
     <figure class="carousel-slide ${index === carouselIndex ? "active" : ""}" data-carousel-index="${index}">
-      <img src="${item.src}" alt="${escapeHTML(item.title)}">
-      <figcaption><strong>${escapeHTML(item.title)}</strong><span>${categoryLabel(item.category)} · รอบ ${item.round}</span></figcaption>
+      <img src="${item.src}" alt="ภาพหลักฐานเด่นลำดับที่ ${index + 1}">
+      <figcaption><span>${categoryLabel(item.category)} · รอบ ${item.round}</span></figcaption>
     </figure>`).join("");
   document.querySelector("#carouselDots").innerHTML = items.map((_, index) => `<button class="${index === carouselIndex ? "active" : ""}" type="button" data-carousel-dot="${index}" aria-label="ไปภาพที่ ${index + 1}"></button>`).join("");
   positionCarousel();
@@ -450,7 +449,7 @@ function moveCarousel(direction) {
 function renderChallengePreview() {
   const items = evidence.filter(item => item.round === state.round && item.category === "challenge");
   document.querySelector("#challengePreview").innerHTML = items.length
-    ? items.map(item => `<img src="${item.src}" alt="${escapeHTML(item.title)}" data-preview-id="${item.id}">`).join("")
+    ? items.map((item, index) => `<button class="story-photo story-photo-${(index % 6) + 1}" type="button" data-preview-id="${item.id}" aria-label="เปิดภาพประกอบลำดับที่ ${index + 1} แบบเต็มจอ"><img src="${item.src}" alt="ภาพประกอบประเด็นท้าทายลำดับที่ ${index + 1}" loading="lazy"><span>${String(index + 1).padStart(2, "0")}</span></button>`).join("")
     : `<div class="challenge-preview-empty">ยังไม่มีภาพประกอบในรอบที่ ${state.round}</div>`;
 }
 
@@ -581,8 +580,8 @@ function updateLightbox() {
   const item = lightboxItems[lightboxIndex];
   if (!item) return;
   document.querySelector("#lightboxImg").src = item.src;
-  document.querySelector("#lightboxImg").alt = item.title;
-  document.querySelector("#lightboxTitle").textContent = item.title;
+  document.querySelector("#lightboxImg").alt = "ภาพหลักฐานแบบเต็มจอ";
+  document.querySelector("#lightboxTitle").textContent = "";
   document.querySelector("#lightboxMeta").textContent = item.category ? `${categoryLabel(item.category)} · รอบ ${item.round}` : "หลักฐานประกอบ";
 }
 
