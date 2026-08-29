@@ -332,6 +332,9 @@ body.manager-mode .challenge-simple-upload { display: flex; }
 .gallery-item { break-inside: avoid; margin: 0 0 10px; position: relative; background: var(--dark); border-radius: 8px; overflow: hidden; }
 .gallery-item img { width: 100%; min-height: 150px; max-height: 430px; object-fit: cover; cursor: zoom-in; transition: filter .2s, transform .35s var(--ease); }
 .gallery-item:hover img { transform: scale(1.025); filter: brightness(.9); }
+.gallery-caption { padding: 12px 14px 13px; }
+.gallery-caption strong { display: block; font-size: 14px; font-weight: 500; }
+.gallery-caption span { color: var(--muted); font: 10px "JetBrains Mono"; }
 .gallery-controls { position: absolute; top: 8px; right: 8px; display: none; gap: 5px; }
 body.edit-mode .gallery-controls { display: flex; }
 .gallery-controls button { border: 0; background: var(--dark); color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; }
@@ -351,7 +354,7 @@ body.edit-mode .edit-icon { transform: rotate(45deg); }
 .lightbox[open] { display: grid; grid-template-columns: 50px 1fr 50px; place-items: center; }
 .lightbox figure { margin: 0; max-width: min(1100px, 80vw); }
 .lightbox img { max-height: 78vh; width: auto; margin: auto; object-fit: contain; border-radius: 6px; }
-.lightbox figcaption { display: flex; justify-content: flex-end; gap: 20px; padding-top: 12px; color: #aaa9a2; }
+.lightbox figcaption { display: flex; justify-content: space-between; gap: 20px; padding-top: 12px; color: #aaa9a2; }
 .lightbox figcaption strong { color: white; font-weight: 500; }
 .lightbox-close { position: fixed; top: 20px; right: 25px; border: 0; background: transparent; color: white; font-size: 36px; cursor: pointer; }
 .lightbox-nav { width: 46px; height: 46px; border: 1px solid #4a4b45; border-radius: 50%; background: transparent; color: white; cursor: pointer; }
@@ -512,6 +515,8 @@ body.edit-mode .edit-icon { transform: rotate(45deg); }
   .drop-zone span { font-size: 14px; }
   .filter-btn { min-height: 44px; font-size: 15px; }
   .gallery { columns: 2 150px; }
+  .gallery-caption strong { font-size: 16px; }
+  .gallery-caption span { font-size: 12px; }
   .lightbox { padding: 70px 12px 25px; }
   .lightbox[open] { grid-template-columns: 1fr 1fr; }
   .lightbox figure { grid-column: span 2; grid-row: 1; max-width: 94vw; }
