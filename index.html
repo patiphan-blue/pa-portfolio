@@ -245,23 +245,12 @@
           </div>
           <div class="evidence-preview">
             <div class="preview-head"><div><p class="mono-label">featured_evidence</p><h3>หลักฐานเด่นของประเด็นท้าทาย</h3></div><button class="text-btn jump-btn" data-target="evidence" type="button">ดูทั้งหมด →</button></div>
-            <form class="challenge-uploader manager-only" id="challengeEvidenceForm">
-              <div class="challenge-upload-head">
-                <div><span>เพิ่มหลักฐานในรอบปัจจุบัน</span><strong>รูปภาพจะถูกจัดเข้า “ประเด็นท้าทาย” ให้อัตโนมัติ</strong></div>
-                <span class="challenge-round-chip" data-round-label>รอบที่ 1</span>
-              </div>
-              <label class="challenge-file-field" for="challengeEvidenceFile">
-                <span>＋</span><strong id="challengeFileLabel">เลือกภาพหลักฐาน</strong><small>JPG, PNG, WebP หรือ GIF</small>
-              </label>
-              <input id="challengeEvidenceFile" type="file" accept="image/*" hidden required>
-              <div class="challenge-form-grid">
-                <label><span>ชื่อหลักฐาน</span><input id="challengeEvidenceTitle" type="text" maxlength="100" placeholder="เช่น นักเรียนทดสอบวงจรด้วย AI" required></label>
-                <label><span>วันที่ดำเนินกิจกรรม</span><input id="challengeEvidenceDate" type="date" required></label>
-              </div>
-              <label><span>คำอธิบายสั้น ๆ</span><textarea id="challengeEvidenceDescription" rows="3" maxlength="280" placeholder="อธิบายว่าภาพนี้แสดงขั้นตอนหรือผลลัพธ์อะไร" required></textarea></label>
-              <button class="btn primary challenge-submit" type="submit">อัปโหลดหลักฐานเข้ารอบนี้ →</button>
-            </form>
-            <div class="challenge-evidence-list" id="challengePreview"></div>
+            <div class="challenge-simple-upload manager-only">
+              <label class="btn primary upload-label" for="challengeEvidenceFile">＋ เพิ่มภาพประกอบ</label>
+              <input id="challengeEvidenceFile" type="file" accept="image/*" multiple hidden>
+              <span>ภาพจะอยู่ในรอบที่กำลังเปิดโดยอัตโนมัติ</span>
+            </div>
+            <div class="preview-grid" id="challengePreview"></div>
           </div>
         </section>
 

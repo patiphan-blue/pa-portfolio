@@ -18,7 +18,6 @@ const defaults = {
     2: { start: "2026-04-01", end: "2026-09-30" }
   },
   roundVisibility: { 1: true, 2: false },
-  challengeEvidenceMeta: {},
   fields: {
     title: "ครูผู้สร้างการเรียนรู้",
     intro: "ครูคอมพิวเตอร์ผู้จัดการเรียนรู้ผ่านการลงมือปฏิบัติจริง มุ่งพัฒนาทักษะการเขียนโปรแกรม วงจรอิเล็กทรอนิกส์ และการใช้ AI อย่างมีวิจารณญาณ",
@@ -214,7 +213,6 @@ async function getUploadedEvidence() {
     const id = divider > 0 ? filename.slice(0, divider) : file.id;
     const encodedTitle = divider > 0 ? filename.slice(divider + 2).replace(/\.[^.]+$/, "") : filename.replace(/\.[^.]+$/, "");
     const { data: publicData } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(file.path);
-    const metadata = state.challengeEvidenceMeta?.[id] || {};
     return {
       id,
       title: decodeURIComponent(encodedTitle),
@@ -223,9 +221,7 @@ async function getUploadedEvidence() {
       round,
       src: publicData.publicUrl,
       storagePath: file.path,
-      createdAt: new Date(file.created_at || 0).getTime(),
-      description: metadata.description || "",
-      activityDate: metadata.activityDate || ""
+      createdAt: new Date(file.created_at || 0).getTime()
     };
   });
 }
@@ -452,36 +448,10 @@ function moveCarousel(direction) {
 }
 
 function renderChallengePreview() {
-  const items = evidence
-    .filter(item => item.round === state.round && item.category === "challenge")
-    .sort((a, b) => String(a.activityDate || a.createdAt).localeCompare(String(b.activityDate || b.createdAt)));
-  const list = document.querySelector("#challengePreview");
-  if (!items.length) {
-    list.innerHTML = `<div class="challenge-evidence-empty"><span>＋</span><strong>ยังไม่มีภาพหลักฐานในรอบที่ ${state.round}</strong><p>${MANAGE_MODE ? "เพิ่มภาพพร้อมชื่อ วันที่ และคำอธิบายจากแบบฟอร์มด้านบน" : "หลักฐานของรอบนี้อยู่ระหว่างการจัดเตรียม"}</p></div>`;
-    return;
-  }
-  list.innerHTML = items.map((item, index) => `
-    <article class="challenge-evidence-card">
-      <button class="challenge-evidence-image" type="button" data-preview-id="${item.id}" aria-label="เปิดดู ${escapeHTML(item.title)} แบบเต็มจอ">
-        <img src="${item.src}" alt="${escapeHTML(item.title)}">
-        <span>${String(index + 1).padStart(2, "0")}</span>
-      </button>
-      <div class="challenge-evidence-copy">
-        <time>${item.activityDate ? formatThaiDate(item.activityDate) : `รอบที่ ${item.round}`}</time>
-        <h4>${escapeHTML(item.title)}</h4>
-        <p>${escapeHTML(item.description || "หลักฐานประกอบการดำเนินงานตามประเด็นท้าทาย")}</p>
-        <div class="challenge-card-actions manager-only">
-          <button type="button" data-challenge-edit="${item.id}">แก้รายละเอียด</button>
-          ${item.seed ? "" : `<button type="button" class="danger" data-challenge-delete="${item.id}">ลบภาพ</button>`}
-        </div>
-      </div>
-    </article>`).join("");
-}
-
-function resetChallengeForm() {
-  document.querySelector("#challengeEvidenceForm").reset();
-  document.querySelector("#challengeEvidenceDate").value = new Date().toISOString().slice(0, 10);
-  document.querySelector("#challengeFileLabel").textContent = "เลือกภาพหลักฐาน";
+  const items = evidence.filter(item => item.round === state.round && item.category === "challenge");
+  document.querySelector("#challengePreview").innerHTML = items.length
+    ? items.map(item => `<img src="${item.src}" alt="${escapeHTML(item.title)}" data-preview-id="${item.id}">`).join("")
+    : `<div class="challenge-preview-empty">ยังไม่มีภาพประกอบในรอบที่ ${state.round}</div>`;
 }
 
 function escapeHTML(text = "") {
@@ -613,9 +583,7 @@ function updateLightbox() {
   document.querySelector("#lightboxImg").src = item.src;
   document.querySelector("#lightboxImg").alt = item.title;
   document.querySelector("#lightboxTitle").textContent = item.title;
-  document.querySelector("#lightboxMeta").textContent = item.category
-    ? `${categoryLabel(item.category)} · รอบ ${item.round}${item.activityDate ? ` · ${formatThaiDate(item.activityDate)}` : ""}${item.description ? ` — ${item.description}` : ""}`
-    : "หลักฐานประกอบ";
+  document.querySelector("#lightboxMeta").textContent = item.category ? `${categoryLabel(item.category)} · รอบ ${item.round}` : "หลักฐานประกอบ";
 }
 
 function moveLightbox(direction) {
@@ -658,30 +626,6 @@ document.addEventListener("click", async event => {
   if (preview) {
     const items = evidence.filter(item => item.round === state.round && item.category === "challenge");
     openLightbox(items, Math.max(0, items.findIndex(item => item.id === preview.dataset.previewId)));
-  }
-  const challengeDelete = event.target.closest("[data-challenge-delete]");
-  if (MANAGE_MODE && challengeDelete && confirm("ลบภาพหลักฐานประเด็นท้าทายนี้หรือไม่?")) {
-    const id = challengeDelete.dataset.challengeDelete;
-    await deleteEvidence(id);
-    evidence = evidence.filter(item => item.id !== id);
-    delete state.challengeEvidenceMeta[id];
-    saveState();
-    renderGallery();
-    toast("ลบภาพหลักฐานแล้ว");
-  }
-  const challengeEdit = event.target.closest("[data-challenge-edit]");
-  if (MANAGE_MODE && challengeEdit) {
-    const item = evidence.find(entry => entry.id === challengeEdit.dataset.challengeEdit);
-    if (item) {
-      const description = prompt("แก้ไขคำอธิบายภาพ", item.description || "");
-      if (description !== null) {
-        item.description = description.trim();
-        state.challengeEvidenceMeta[item.id] = { description: item.description, activityDate: item.activityDate || "" };
-        saveState();
-        renderGallery();
-        toast("บันทึกคำอธิบายแล้ว");
-      }
-    }
   }
   const staticImage = event.target.closest("[data-static-lightbox]");
   if (staticImage) openLightbox([{ src: staticImage.src, title: staticImage.alt }], 0);
@@ -828,46 +772,24 @@ document.querySelector("#evidenceUpload").addEventListener("change", event => {
   if (MANAGE_MODE) handleFiles(event.target.files);
   event.target.value = "";
 });
-document.querySelector("#challengeEvidenceFile").addEventListener("change", event => {
-  const file = event.target.files[0];
-  if (!file) return;
-  document.querySelector("#challengeFileLabel").textContent = file.name;
-  const title = document.querySelector("#challengeEvidenceTitle");
-  if (!title.value.trim()) title.value = file.name.replace(/\.[^.]+$/, "");
-});
-document.querySelector("#challengeEvidenceForm").addEventListener("submit", async event => {
-  event.preventDefault();
+document.querySelector("#challengeEvidenceFile").addEventListener("change", async event => {
   if (!MANAGE_MODE) return;
-  const file = document.querySelector("#challengeEvidenceFile").files[0];
-  if (!file?.type.startsWith("image/")) return toast("กรุณาเลือกไฟล์ภาพ");
-  const item = {
-    id: crypto.randomUUID(),
-    title: document.querySelector("#challengeEvidenceTitle").value.trim(),
-    description: document.querySelector("#challengeEvidenceDescription").value.trim(),
-    activityDate: document.querySelector("#challengeEvidenceDate").value,
-    category: "challenge",
-    round: state.round,
-    _file: file,
-    createdAt: Date.now()
-  };
-  const button = event.currentTarget.querySelector("button[type=submit]");
-  button.disabled = true;
-  button.textContent = "กำลังอัปโหลด...";
-  try {
-    await putEvidence(item);
-    evidence.push(item);
-    state.challengeEvidenceMeta[item.id] = { description: item.description, activityDate: item.activityDate };
-    saveState();
-    resetChallengeForm();
-    renderGallery();
-    toast("เพิ่มหลักฐานประเด็นท้าทายแล้ว");
-  } catch (error) {
-    console.error(error);
-    toast(`อัปโหลดไม่สำเร็จ: ${error.message}`);
-  } finally {
-    button.disabled = false;
-    button.textContent = "อัปโหลดหลักฐานเข้ารอบนี้ →";
+  const files = [...event.target.files].filter(file => file.type.startsWith("image/"));
+  if (!files.length) return toast("กรุณาเลือกไฟล์ภาพ");
+  toast(`กำลังเพิ่มภาพประกอบ ${files.length} ภาพ...`);
+  for (const file of files) {
+    const item = { id: crypto.randomUUID(), title: file.name.replace(/\.[^.]+$/, ""), category: "challenge", round: state.round, _file: file, createdAt: Date.now() };
+    try {
+      await putEvidence(item);
+      evidence.push(item);
+    } catch (error) {
+      console.error(error);
+      toast(`อัปโหลด ${file.name} ไม่สำเร็จ: ${error.message}`);
+    }
   }
+  event.target.value = "";
+  renderGallery();
+  toast(`เพิ่มภาพประกอบในรอบที่ ${state.round} แล้ว`);
 });
 document.querySelector("#criteriaList").addEventListener("change", event => {
   if (!MANAGE_MODE) return;
@@ -1051,7 +973,6 @@ async function init() {
   const profile = await getPublicProfile();
   if (profile) document.querySelector("#profilePhoto").src = profile;
   applyState();
-  resetChallengeForm();
   updateClock();
   setInterval(updateClock, 30000);
   const initial = location.hash.slice(1);
