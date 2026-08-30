@@ -204,6 +204,8 @@ th:last-child, td:last-child { border-right: 0; }
 body.edit-mode .subject-cell { cursor: text; background: #fff9ed; }
 
 .criteria-list { display: grid; gap: 42px; }
+#criteriaList [hidden] { display: none !important; }
+.criteria-group { scroll-margin-top: calc(var(--topbar) + 84px); }
 .criteria-mobile-nav { display: none; }
 .criteria-group { display: grid; grid-template-columns: minmax(260px, .9fr) minmax(300px, 1.1fr) auto; gap: 35px; align-items: end; margin-top: 42px; padding: 30px 8px 20px; border-bottom: 3px solid var(--dark); }
 .criteria-group:first-child { margin-top: 0; }

@@ -381,7 +381,7 @@ function renderCriteria() {
   applyCriteriaFilter();
 }
 
-function applyCriteriaFilter() {
+function applyCriteriaFilter(moveToResults = false) {
   document.querySelectorAll("#criteriaList [data-criteria-group]").forEach(element => {
     element.hidden = activeCriteriaGroup !== "all" && element.dataset.criteriaGroup !== activeCriteriaGroup;
   });
@@ -393,6 +393,19 @@ function applyCriteriaFilter() {
   const visibleCount = activeCriteriaGroup === "all" ? 15 : criteria.filter(item => item[0].startsWith(`${activeCriteriaGroup}.`)).length;
   const status = document.querySelector("#criteriaMobileStatus");
   if (status) status.textContent = `แสดง ${visibleCount} หัวข้อ · แตะหัวข้อเพื่อเปิดดูหลักฐาน`;
+  if (moveToResults) {
+    requestAnimationFrame(() => {
+      const firstGroup = document.querySelector("#criteriaList .criteria-group:not([hidden])");
+      if (!firstGroup) return;
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      firstGroup.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+      const heading = firstGroup.querySelector("h3");
+      if (heading) {
+        heading.tabIndex = -1;
+        heading.focus({ preventScroll: true });
+      }
+    });
+  }
 }
 
 function categoryLabel(category) {
@@ -636,7 +649,7 @@ document.addEventListener("click", async event => {
   const criteriaFilter = event.target.closest("[data-criteria-filter]");
   if (criteriaFilter) {
     activeCriteriaGroup = criteriaFilter.dataset.criteriaFilter;
-    applyCriteriaFilter();
+    applyCriteriaFilter(true);
   }
 
   const galleryImage = event.target.closest("[data-gallery-image]");
