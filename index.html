@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="utf-8">
@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#171816">
   <meta name="description" content="แฟ้มประเมินผลการปฏิบัติงาน PA สำหรับครูคอมพิวเตอร์">
   <title>PA.DEV — แฟ้มประเมินผลการปฏิบัติงาน</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,8 +28,8 @@
           <span class="live-dot">พร้อมนำเสนอ</span>
         </div>
         <div class="round-switch" role="group" aria-label="เลือกรอบการประเมิน">
-          <button class="round-btn active" data-round="1" type="button">รอบ 1</button>
-          <button class="round-btn" data-round="2" type="button">รอบ 2</button>
+          <button class="round-btn active" data-round="1" type="button" aria-pressed="true">รอบ 1</button>
+          <button class="round-btn" data-round="2" type="button" aria-pressed="false">รอบ 2</button>
         </div>
         <div class="cycle-period" aria-live="polite">
           <span>ช่วงเวลาประเมิน</span>
@@ -43,10 +44,10 @@
           <span><b>เผยแพร่รอบนี้</b><small>กรรมการจะมองเห็นข้อมูลรอบนี้</small></span>
         </label>
         <label class="year-label" for="yearInput">ปีงบประมาณ</label>
-        <input id="yearInput" class="year-input" inputmode="numeric" value="2569" aria-label="ปีงบประมาณ">
+        <input id="yearInput" class="year-input" type="text" inputmode="numeric" value="2569">
       </div>
 
-      <nav class="main-nav">
+      <nav class="main-nav" aria-label="เมนูส่วนหลัก">
         <a class="nav-link active" href="#overview" data-section="overview"><span>⌂</span>ภาพรวม</a>
         <a class="nav-link" href="#profile" data-section="profile"><span>◎</span>ข้อมูลและภาระงาน</a>
         <a class="nav-link" href="#performance" data-section="performance"><span>◇</span>ผลการปฏิบัติงาน</a>
@@ -69,7 +70,7 @@
         </div>
         <div class="top-actions">
           <span class="reviewer-badge"><i></i>โหมดกรรมการ · อ่านอย่างเดียว</span>
-          <button class="btn ghost" id="exportBtn" type="button" title="สำรองข้อมูลทั้งหมด">สำรองข้อมูล</button>
+          <button class="btn ghost" id="exportBtn" type="button">สำรองข้อมูล</button>
           <button class="btn ghost manager-only" id="logoutBtn" type="button">ออกจากระบบ</button>
           <button class="btn primary" id="editBtn" type="button">
             <span class="edit-icon">✦</span><span id="editLabel">แก้ไขแฟ้ม</span>
@@ -77,7 +78,7 @@
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" tabindex="-1">
         <section class="page-section active" id="overview" data-title="ภาพรวม">
           <div class="hero">
             <div class="hero-copy">
@@ -91,7 +92,7 @@
               </div>
               <p class="hero-code close" aria-hidden="true">};</p>
             </div>
-            <div class="terminal-card" aria-label="ข้อมูลผู้รับการประเมิน">
+            <div class="terminal-card">
               <div class="terminal-bar">
                 <div class="window-dots"><i></i><i></i><i></i></div>
                 <span>portfolio.config.js</span>
@@ -144,7 +145,7 @@
           <div class="profile-layout">
             <div class="identity-panel">
               <div class="profile-photo-wrap">
-                <img id="profilePhoto" src="images/profile.jpg" alt="ภาพผู้รับการประเมิน">
+                <img id="profilePhoto" src="images/profile.jpg" alt="ภาพผู้รับการประเมิน" width="1024" height="1024" loading="lazy" decoding="async">
                 <label class="photo-change edit-only" for="profileUpload">เปลี่ยนภาพ</label>
                 <input id="profileUpload" type="file" accept="image/*" hidden>
               </div>
@@ -198,15 +199,15 @@
             <div><p class="mono-label">performance_report</p><h2>ผลการปฏิบัติงาน<br>ตามมาตรฐานตำแหน่ง</h2></div>
             <p>โครงสร้างหัวข้อคงเดิมทุกปี ส่วนรายละเอียดและหลักฐานจะแยกตามรอบการประเมิน</p>
           </div>
-          <div class="criteria-mobile-nav" aria-label="เลือกด้านการประเมิน">
+          <nav class="criteria-mobile-nav" aria-label="เลือกด้านการประเมิน">
             <div class="criteria-mobile-scroll">
               <button class="active" type="button" data-criteria-filter="all">ทั้งหมด <span>15</span></button>
               <button type="button" data-criteria-filter="1">ด้าน 1 <span>8</span></button>
               <button type="button" data-criteria-filter="2">ด้าน 2 <span>4</span></button>
               <button type="button" data-criteria-filter="3">ด้าน 3 <span>3</span></button>
             </div>
-            <small id="criteriaMobileStatus">แตะหัวข้อเพื่อเปิดดูหลักฐาน</small>
-          </div>
+            <small id="criteriaMobileStatus" role="status" aria-live="polite">แตะหัวข้อเพื่อเปิดดูหลักฐาน</small>
+          </nav>
           <div class="criteria-list" id="criteriaList"></div>
         </section>
 
@@ -232,7 +233,7 @@
                 เปิดเว็บแอปบทเรียน <span aria-hidden="true">↗</span>
               </a>
             </div>
-            <div class="learning-flow" aria-label="ขั้นตอนการเรียนรู้">
+            <div class="learning-flow">
               <div class="flow-head"><span>learning_session.flow</span><i>ONLINE</i></div>
               <ol>
                 <li><span>01</span><div><strong>ศึกษาบทเรียนออนไลน์</strong><small>ทบทวนแนวคิดและดูตัวอย่างบน Chromebook</small></div></li>
@@ -262,32 +263,32 @@
               <input id="evidenceUpload" type="file" accept="image/*" multiple hidden>
             </div>
           </div>
-          <div class="motion-carousel" aria-label="ภาพหลักฐานแนะนำ">
+          <section class="motion-carousel" aria-roledescription="ภาพสไลด์" aria-label="ภาพหลักฐานแนะนำ">
             <div class="carousel-head">
               <div><span class="mono-label">visual_highlights</span><strong>ภาพเด่นประจำรอบ</strong></div>
               <div class="carousel-controls">
                 <button id="carouselPrev" type="button" aria-label="ภาพก่อนหน้า">←</button>
-                <div id="carouselDots" aria-label="เลือกภาพ"></div>
+                <div id="carouselDots" role="group" aria-label="เลือกภาพ"></div>
                 <button id="carouselNext" type="button" aria-label="ภาพถัดไป">→</button>
               </div>
             </div>
             <div class="carousel-viewport" id="carouselViewport">
               <div class="carousel-track" id="carouselTrack"></div>
             </div>
-          </div>
-          <div class="drop-zone" id="dropZone" tabindex="0">
-            <div class="drop-icon">⇧</div>
-            <div><strong>ลากภาพมาวางที่นี่</strong><span>รองรับ JPG, PNG, WEBP · เลือกได้หลายภาพ</span></div>
-          </div>
+          </section>
+          <button class="drop-zone" id="dropZone" type="button" aria-describedby="dropHint">
+            <span class="drop-icon" aria-hidden="true">⇧</span>
+            <span><strong>ลากภาพมาวางที่นี่</strong><span id="dropHint">รองรับ JPG, PNG, WEBP · เลือกได้หลายภาพ</span></span>
+          </button>
           <div class="gallery-toolbar">
             <div class="filter-pills" role="group" aria-label="กรองหลักฐาน">
-              <button class="filter-btn active" data-filter="all" type="button">ทั้งหมด</button>
-              <button class="filter-btn" data-filter="teaching" type="button">การจัดการเรียนรู้</button>
-              <button class="filter-btn" data-filter="support" type="button">ส่งเสริมและสนับสนุน</button>
-              <button class="filter-btn" data-filter="development" type="button">พัฒนาตนเอง</button>
-              <button class="filter-btn" data-filter="challenge" type="button">ประเด็นท้าทาย</button>
+              <button class="filter-btn active" data-filter="all" type="button" aria-pressed="true">ทั้งหมด</button>
+              <button class="filter-btn" data-filter="teaching" type="button" aria-pressed="false">การจัดการเรียนรู้</button>
+              <button class="filter-btn" data-filter="support" type="button" aria-pressed="false">ส่งเสริมและสนับสนุน</button>
+              <button class="filter-btn" data-filter="development" type="button" aria-pressed="false">พัฒนาตนเอง</button>
+              <button class="filter-btn" data-filter="challenge" type="button" aria-pressed="false">ประเด็นท้าทาย</button>
             </div>
-            <span id="galleryCount">0 รายการ</span>
+            <span id="galleryCount" role="status" aria-live="polite">0 รายการ</span>
           </div>
           <div class="gallery" id="gallery"></div>
           <div class="empty-state" id="emptyState" hidden>
@@ -298,18 +299,18 @@
     </div>
   </div>
 
-  <dialog class="lightbox" id="lightbox">
+  <dialog class="lightbox" id="lightbox" aria-labelledby="lightboxTitle">
     <button class="lightbox-close" id="lightboxClose" type="button" aria-label="ปิด">×</button>
     <button class="lightbox-nav prev" id="lightboxPrev" type="button" aria-label="ภาพก่อนหน้า">←</button>
-    <figure><img id="lightboxImg" src="images/1_1.png" alt="ภาพหลักฐาน"><figcaption><strong id="lightboxTitle"></strong><span id="lightboxMeta"></span></figcaption></figure>
+    <figure><img id="lightboxImg" src="images/1_1.png" alt="ภาพหลักฐาน" width="552" height="726" loading="lazy" decoding="async"><figcaption><strong id="lightboxTitle"></strong><span id="lightboxMeta"></span></figcaption></figure>
     <button class="lightbox-nav next" id="lightboxNext" type="button" aria-label="ภาพถัดไป">→</button>
   </dialog>
 
-  <dialog class="backup-dialog" id="backupDialog">
+  <dialog class="backup-dialog" id="backupDialog" aria-labelledby="backupTitle">
     <form method="dialog">
-      <button class="dialog-close" value="cancel" aria-label="ปิด">×</button>
+      <button class="dialog-close" type="submit" value="cancel" aria-label="ปิด">×</button>
       <p class="mono-label">data.portability</p>
-      <h2>สำรองและย้ายข้อมูล</h2>
+      <h2 id="backupTitle">สำรองและย้ายข้อมูล</h2>
       <p>ดาวน์โหลดข้อมูลข้อความเป็นไฟล์ JSON หรือเรียกคืนไฟล์เดิม ภาพที่อัปโหลดจะเก็บในเบราว์เซอร์ของอุปกรณ์นี้</p>
       <div class="dialog-actions">
         <button class="btn primary" id="downloadData" type="button">ดาวน์โหลดข้อมูล</button>
@@ -319,11 +320,11 @@
     </form>
   </dialog>
 
-  <dialog class="login-dialog" id="loginDialog">
+  <dialog class="login-dialog" id="loginDialog" aria-labelledby="loginTitle">
     <form id="loginForm">
       <button class="dialog-close" id="loginClose" type="button" aria-label="ปิด">×</button>
       <p class="mono-label">secure.manager</p>
-      <h2>เข้าสู่โหมดจัดการ</h2>
+      <h2 id="loginTitle">เข้าสู่โหมดจัดการ</h2>
       <p>เฉพาะเจ้าของแฟ้มเท่านั้นที่เพิ่ม แก้ไข หรือลบหลักฐานได้</p>
       <label for="loginEmail">อีเมล</label>
       <input id="loginEmail" name="email" type="email" autocomplete="username" required>
@@ -334,10 +335,10 @@
     </form>
   </dialog>
 
-  <dialog class="login-dialog" id="resetPasswordDialog">
+  <dialog class="login-dialog" id="resetPasswordDialog" aria-labelledby="resetPasswordTitle">
     <form id="resetPasswordForm">
       <p class="mono-label">account.recovery</p>
-      <h2>ตั้งรหัสผ่านใหม่</h2>
+      <h2 id="resetPasswordTitle">ตั้งรหัสผ่านใหม่</h2>
       <p>กรอกรหัสผ่านใหม่อย่างน้อย 8 ตัวอักษร แล้วใช้รหัสนี้เข้าสู่หน้าแก้ไข</p>
       <label for="newPassword">รหัสผ่านใหม่</label>
       <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required>
@@ -349,7 +350,7 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="app.js"></script>
 </body>
 </html>

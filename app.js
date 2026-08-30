@@ -289,6 +289,7 @@ function applyState() {
     const round = Number(btn.dataset.round);
     btn.hidden = !MANAGE_MODE && !state.roundVisibility[round];
     btn.classList.toggle("active", round === state.round);
+    btn.setAttribute("aria-pressed", String(round === state.round));
   });
   document.querySelector("#roundPublishedInput").checked = Boolean(state.roundVisibility[state.round]);
   document.querySelectorAll("[data-round-label]").forEach(el => el.textContent = `รอบที่ ${state.round}`);
@@ -342,12 +343,12 @@ function renderCriteria() {
     return `${groupHeader}
     <article class="criterion ${expanded}" data-criteria-group="${groupNumber}" data-criterion-number="${number}">
       <span class="criterion-number">${number}</span>
-      <button class="criterion-toggle" type="button" aria-expanded="${expanded ? "true" : "false"}">
+      <button class="criterion-toggle" type="button" aria-expanded="${expanded ? "true" : "false"}" aria-controls="criterion-body-${number.replace(".", "-")}">
         <span>${number}</span>
         <div><strong>${title}</strong><small class="${imgs.length ? "has-evidence" : ""}">${evidenceStatus}</small></div>
         <i aria-hidden="true">⌄</i>
       </button>
-      <div class="criterion-body">
+      <div class="criterion-body" id="criterion-body-${number.replace(".", "-")}">
         <div class="criterion-head">
           <h3>${title}</h3>
           <div class="criterion-copy">
@@ -362,10 +363,10 @@ function renderCriteria() {
         </div>
         <div class="criterion-visuals" data-criterion-gallery>
           ${main ? `
-            <div class="zoom-frame" data-zoom-frame><img src="${main.src}" alt="${title} ภาพหลัก" data-criterion-main><span class="zoom-hint">เลื่อนเมาส์เพื่อซูม · คลิกเพื่อดูเต็มจอ</span></div>
+            <div class="zoom-frame" data-zoom-frame><img src="${main.src}" alt="${title} ภาพหลัก" loading="lazy" decoding="async" data-criterion-main><span class="zoom-hint">เลื่อนเมาส์เพื่อซูม · คลิกเพื่อดูเต็มจอ</span></div>
             <div class="criterion-thumbs">${imgs.map((item, i) => `
               <div class="criterion-thumb-wrap">
-                <button class="criterion-thumb ${i === 0 ? "active" : ""}" type="button" data-thumb-src="${item.src}" data-thumb-title="${escapeHTML(item.title)}" data-thumb-index="${i}" aria-label="ดู${title} ภาพที่ ${i + 1}"><img src="${item.src}" alt=""></button>
+                <button class="criterion-thumb ${i === 0 ? "active" : ""}" type="button" data-thumb-src="${item.src}" data-thumb-title="${escapeHTML(item.title)}" data-thumb-index="${i}" aria-label="ดู${title} ภาพที่ ${i + 1}" aria-pressed="${i === 0 ? "true" : "false"}"><img src="${item.src}" alt="" loading="lazy" decoding="async"></button>
                 <div class="criterion-image-tools">
                   ${item.seed ? "" : `<button type="button" data-criterion-rename="${item.id}" aria-label="เปลี่ยนชื่อภาพ">✎</button>`}
                   <button type="button" data-criterion-remove="${item.id}" data-criterion-number="${number}" data-seed-index="${item.seed ? item.seedIndex : ""}" aria-label="ลบภาพ">×</button>
@@ -385,7 +386,9 @@ function applyCriteriaFilter() {
     element.hidden = activeCriteriaGroup !== "all" && element.dataset.criteriaGroup !== activeCriteriaGroup;
   });
   document.querySelectorAll("[data-criteria-filter]").forEach(button => {
-    button.classList.toggle("active", button.dataset.criteriaFilter === activeCriteriaGroup);
+    const active = button.dataset.criteriaFilter === activeCriteriaGroup;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
   });
   const visibleCount = activeCriteriaGroup === "all" ? 15 : criteria.filter(item => item[0].startsWith(`${activeCriteriaGroup}.`)).length;
   const status = document.querySelector("#criteriaMobileStatus");
@@ -401,7 +404,7 @@ function renderGallery() {
   const gallery = document.querySelector("#gallery");
   gallery.innerHTML = current.map(item => `
     <article class="gallery-item" data-id="${item.id}">
-      <img src="${item.src}" alt="${escapeHTML(item.title)}" data-gallery-image>
+      <img src="${item.src}" alt="${escapeHTML(item.title)}" loading="lazy" decoding="async" data-gallery-image>
       <div class="gallery-controls">
         <button type="button" data-rename="${item.id}" aria-label="เปลี่ยนชื่อ">✎</button>
         ${item.seed ? "" : `<button type="button" data-delete="${item.id}" aria-label="ลบภาพ">×</button>`}
@@ -421,10 +424,10 @@ function renderCarousel() {
   carouselIndex = Math.min(carouselIndex, Math.max(0, items.length - 1));
   document.querySelector("#carouselTrack").innerHTML = items.map((item, index) => `
     <figure class="carousel-slide ${index === carouselIndex ? "active" : ""}" data-carousel-index="${index}">
-      <img src="${item.src}" alt="${escapeHTML(item.title)}">
+      <img src="${item.src}" alt="${escapeHTML(item.title)}" loading="lazy" decoding="async" ${index > 0 ? 'fetchpriority="low"' : ""}>
       <figcaption><strong>${escapeHTML(item.title)}</strong><span>${categoryLabel(item.category)} · รอบ ${item.round}</span></figcaption>
     </figure>`).join("");
-  document.querySelector("#carouselDots").innerHTML = items.map((_, index) => `<button class="${index === carouselIndex ? "active" : ""}" type="button" data-carousel-dot="${index}" aria-label="ไปภาพที่ ${index + 1}"></button>`).join("");
+  document.querySelector("#carouselDots").innerHTML = items.map((_, index) => `<button class="${index === carouselIndex ? "active" : ""}" type="button" data-carousel-dot="${index}" aria-label="ไปภาพที่ ${index + 1}" ${index === carouselIndex ? 'aria-current="true"' : ""}></button>`).join("");
   positionCarousel();
 }
 
@@ -437,7 +440,12 @@ function positionCarousel() {
   const offset = active.offsetLeft - Math.max(0, (viewport.clientWidth - active.clientWidth) / 2);
   track.style.transform = `translateX(${-offset}px)`;
   slides.forEach((slide, index) => slide.classList.toggle("active", index === carouselIndex));
-  document.querySelectorAll("[data-carousel-dot]").forEach((dot, index) => dot.classList.toggle("active", index === carouselIndex));
+  document.querySelectorAll("[data-carousel-dot]").forEach((dot, index) => {
+    const active = index === carouselIndex;
+    dot.classList.toggle("active", active);
+    if (active) dot.setAttribute("aria-current", "true");
+    else dot.removeAttribute("aria-current");
+  });
 }
 
 function moveCarousel(direction) {
@@ -452,7 +460,7 @@ function renderChallengePreview() {
     .filter(item => item.round === state.round && item.category === "challenge")
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   document.querySelector("#challengePreview").innerHTML = items.length
-    ? items.map((item, index) => `<button class="story-photo story-photo-${(index % 6) + 1}" type="button" data-preview-id="${item.id}" aria-label="เปิดภาพประกอบลำดับที่ ${index + 1} แบบเต็มจอ"><img src="${item.src}" alt="ภาพประกอบประเด็นท้าทายลำดับที่ ${index + 1}" loading="lazy"><span>${String(index + 1).padStart(2, "0")}</span></button>`).join("")
+    ? items.map((item, index) => `<button class="story-photo story-photo-${(index % 6) + 1}" type="button" data-preview-id="${item.id}" aria-label="เปิดภาพประกอบลำดับที่ ${index + 1} แบบเต็มจอ"><img src="${item.src}" alt="ภาพประกอบประเด็นท้าทายลำดับที่ ${index + 1}" loading="lazy" decoding="async"><span>${String(index + 1).padStart(2, "0")}</span></button>`).join("")
     : `<div class="challenge-preview-empty">ยังไม่มีภาพประกอบในรอบที่ ${state.round}</div>`;
 }
 
@@ -470,15 +478,28 @@ function setEditMode(value) {
   toast(editMode ? "เปิดโหมดแก้ไขแล้ว — คลิกข้อความที่ต้องการเปลี่ยน" : "บันทึกการแก้ไขเรียบร้อย");
 }
 
-function navigate(sectionId) {
+function navigate(sectionId, moveFocus = true) {
   document.querySelectorAll(".page-section").forEach(section => section.classList.toggle("active", section.id === sectionId));
-  document.querySelectorAll(".nav-link").forEach(link => link.classList.toggle("active", link.dataset.section === sectionId));
+  document.querySelectorAll(".nav-link").forEach(link => {
+    const active = link.dataset.section === sectionId;
+    link.classList.toggle("active", active);
+    if (active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
   const section = document.querySelector(`#${sectionId}`);
   document.querySelector("#crumb").textContent = section?.dataset.title || "ภาพรวม";
+  document.title = `${section?.dataset.title || "ภาพรวม"} | PA.DEV`;
   history.replaceState(null, "", `#${sectionId}`);
   window.scrollTo({ top: 0, behavior: "smooth" });
   document.body.classList.remove("menu-open");
   document.querySelector("#menuBtn").setAttribute("aria-expanded", "false");
+  if (moveFocus) {
+    const heading = section?.querySelector("h1, h2");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
+  }
 }
 
 function toast(message) {
@@ -638,7 +659,11 @@ document.addEventListener("click", async event => {
     main.animate([{ opacity: .45, transform: "scale(.98)" }, { opacity: 1, transform: "scale(1)" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
     main.src = thumb.dataset.thumbSrc;
     main.dataset.activeIndex = thumb.dataset.thumbIndex;
-    gallery.querySelectorAll(".criterion-thumb").forEach(button => button.classList.toggle("active", button === thumb));
+    gallery.querySelectorAll(".criterion-thumb").forEach(button => {
+      const active = button === thumb;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
   }
   const criterionMain = event.target.closest("[data-criterion-main]");
   if (criterionMain) {
@@ -707,7 +732,11 @@ document.addEventListener("click", async event => {
   const filter = event.target.closest(".filter-btn");
   if (filter) {
     activeFilter = filter.dataset.filter;
-    document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.toggle("active", btn === filter));
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      const active = btn === filter;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
     renderGallery();
   }
 });
@@ -818,7 +847,6 @@ const dropZone = document.querySelector("#dropZone");
 ["dragleave", "drop"].forEach(type => dropZone.addEventListener(type, event => { event.preventDefault(); dropZone.classList.remove("dragover"); }));
 dropZone.addEventListener("drop", event => { if (MANAGE_MODE) handleFiles(event.dataTransfer.files); });
 dropZone.addEventListener("click", () => { if (MANAGE_MODE) document.querySelector("#evidenceUpload").click(); });
-dropZone.addEventListener("keydown", event => { if (MANAGE_MODE && (event.key === "Enter" || event.key === " ")) document.querySelector("#evidenceUpload").click(); });
 
 document.querySelector("#lightboxClose").addEventListener("click", () => document.querySelector("#lightbox").close());
 document.querySelector("#lightboxPrev").addEventListener("click", () => moveLightbox(-1));
@@ -978,7 +1006,7 @@ async function init() {
   updateClock();
   setInterval(updateClock, 30000);
   const initial = location.hash.slice(1);
-  navigate(document.querySelector(`#${CSS.escape(initial)}`)?.classList.contains("page-section") ? initial : "overview");
+  navigate(document.querySelector(`#${CSS.escape(initial)}`)?.classList.contains("page-section") ? initial : "overview", false);
 }
 
 init();
