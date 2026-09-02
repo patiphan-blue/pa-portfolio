@@ -70,8 +70,8 @@
         </div>
         <div class="top-actions">
           <span class="reviewer-badge"><i></i>โหมดกรรมการ · อ่านอย่างเดียว</span>
-          <button class="btn ghost" id="exportBtn" type="button">สำรองข้อมูล</button>
-          <button class="btn ghost manager-only" id="logoutBtn" type="button">ออกจากระบบ</button>
+          <button class="btn ghost" id="exportBtn" type="button"><span class="btn-icon" aria-hidden="true">&#8595;</span>สำรองข้อมูล</button>
+          <button class="btn ghost manager-only" id="logoutBtn" type="button"><span class="btn-icon" aria-hidden="true">&#8617;</span>ออกจากระบบ</button>
           <button class="btn primary" id="editBtn" type="button">
             <span class="edit-icon">✦</span><span id="editLabel">แก้ไขแฟ้ม</span>
           </button>
@@ -88,7 +88,7 @@
               <p class="hero-lead editable" data-field="intro">ครูคอมพิวเตอร์ผู้จัดการเรียนรู้ผ่านการลงมือปฏิบัติจริง มุ่งพัฒนาทักษะการเขียนโปรแกรม วงจรอิเล็กทรอนิกส์ และการใช้ AI อย่างมีวิจารณญาณ</p>
               <div class="hero-actions">
                 <button class="btn primary jump-btn" data-target="performance" type="button">ดูผลการปฏิบัติงาน <span>→</span></button>
-                <button class="btn dark jump-btn" data-target="evidence" type="button">เปิดคลังหลักฐาน</button>
+                <button class="btn dark jump-btn" data-target="evidence" type="button"><span class="btn-icon" aria-hidden="true">&#9638;</span>เปิดคลังหลักฐาน</button>
               </div>
               <p class="hero-code close" aria-hidden="true">};</p>
             </div>
@@ -122,6 +122,7 @@
           <div class="section-intro compact">
             <div>
               <p class="mono-label">annual_roadmap</p>
+              <span class="heading-icon" aria-hidden="true">&#8635;</span>
               <h2>หนึ่งปี สองรอบ<br>เรื่องราวเดียวกัน</h2>
             </div>
             <p>แต่ละรอบเก็บเนื้อหาและหลักฐานแยกกัน คุณจึงอัปเดตข้อมูลได้โดยไม่ทับงานเดิม และสลับนำเสนอได้ทันที</p>
@@ -139,7 +140,7 @@
 
         <section class="page-section" id="profile" data-title="ข้อมูลและภาระงาน">
           <div class="section-intro">
-            <div><p class="mono-label">profile_and_workload</p><h2>ข้อมูลพื้นฐาน<br>ที่อัปเดตได้ทุกปี</h2></div>
+            <div><span class="heading-icon" aria-hidden="true">&#9678;</span><p class="mono-label">profile_and_workload</p><h2>ข้อมูลพื้นฐาน<br>ที่อัปเดตได้ทุกปี</h2></div>
             <p>กด “แก้ไขแฟ้ม” เพื่อเปลี่ยนข้อมูลในตำแหน่งจริง ข้อมูลจะบันทึกอัตโนมัติในอุปกรณ์นี้</p>
           </div>
           <div class="profile-layout">
@@ -196,7 +197,7 @@
 
         <section class="page-section" id="performance" data-title="ผลการปฏิบัติงาน">
           <div class="section-intro">
-            <div><p class="mono-label">performance_report</p><h2>ผลการปฏิบัติงาน<br>ตามมาตรฐานตำแหน่ง</h2></div>
+            <div><span class="heading-icon" aria-hidden="true">&#10003;</span><p class="mono-label">performance_report</p><h2>ผลการปฏิบัติงาน<br>ตามมาตรฐานตำแหน่ง</h2></div>
             <p>โครงสร้างหัวข้อคงเดิมทุกปี ส่วนรายละเอียดและหลักฐานจะแยกตามรอบการประเมิน</p>
           </div>
           <nav class="criteria-mobile-nav" aria-label="เลือกด้านการประเมิน">
@@ -214,6 +215,7 @@
         <section class="page-section" id="challenge" data-title="ประเด็นท้าทาย">
           <div class="challenge-hero">
             <div>
+              <span class="heading-icon" aria-hidden="true">&#9889;</span>
               <p class="mono-label">challenge.resolve()</p>
               <h2 class="editable round-editable" data-field="challengeTitle">พัฒนาทักษะการคิดเชิงคำนวณ ด้วยการเรียนรู้แบบ Project-based Learning</h2>
             </div>
@@ -257,7 +259,7 @@
 
         <section class="page-section" id="evidence" data-title="คลังหลักฐาน">
           <div class="section-intro evidence-heading">
-            <div><p class="mono-label">evidence.repository</p><h2>คลังหลักฐาน</h2></div>
+            <div><span class="heading-icon" aria-hidden="true">&#9638;</span><p class="mono-label">evidence.repository</p><h2>คลังหลักฐาน</h2></div>
             <div class="evidence-actions">
               <label class="btn primary upload-label" for="evidenceUpload"><span>＋</span> เพิ่มภาพหลักฐาน</label>
               <input id="evidenceUpload" type="file" accept="image/*" multiple hidden>
@@ -313,8 +315,8 @@
       <h2 id="backupTitle">สำรองและย้ายข้อมูล</h2>
       <p>ดาวน์โหลดข้อมูลข้อความเป็นไฟล์ JSON หรือเรียกคืนไฟล์เดิม ภาพที่อัปโหลดจะเก็บในเบราว์เซอร์ของอุปกรณ์นี้</p>
       <div class="dialog-actions">
-        <button class="btn primary" id="downloadData" type="button">ดาวน์โหลดข้อมูล</button>
-        <label class="btn ghost" for="restoreData">เรียกคืนข้อมูล</label>
+        <button class="btn primary" id="downloadData" type="button"><span class="btn-icon" aria-hidden="true">&#8595;</span>ดาวน์โหลดข้อมูล</button>
+        <label class="btn ghost" for="restoreData"><span class="btn-icon" aria-hidden="true">&#8593;</span>เรียกคืนข้อมูล</label>
         <input id="restoreData" type="file" accept=".json,application/json" hidden>
       </div>
     </form>
@@ -331,7 +333,7 @@
       <label for="loginPassword">รหัสผ่าน</label>
       <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
       <p class="login-error" id="loginError" role="alert" hidden></p>
-      <button class="btn primary login-submit" id="loginSubmit" type="submit">เข้าสู่ระบบ</button>
+      <button class="btn primary login-submit" id="loginSubmit" type="submit"><span class="btn-icon" aria-hidden="true">&#8594;</span>เข้าสู่ระบบ</button>
     </form>
   </dialog>
 
@@ -345,7 +347,7 @@
       <label for="confirmPassword">ยืนยันรหัสผ่านใหม่</label>
       <input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
       <p class="login-error" id="resetPasswordError" role="alert" hidden></p>
-      <button class="btn primary login-submit" id="resetPasswordSubmit" type="submit">บันทึกรหัสผ่านใหม่</button>
+      <button class="btn primary login-submit" id="resetPasswordSubmit" type="submit"><span class="btn-icon" aria-hidden="true">&#10003;</span>บันทึกรหัสผ่านใหม่</button>
     </form>
   </dialog>
 
