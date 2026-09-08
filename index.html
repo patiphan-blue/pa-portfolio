@@ -93,6 +93,10 @@
               <p class="hero-code close" aria-hidden="true">};</p>
             </div>
             <div class="terminal-card">
+              <div class="chip-scene" aria-hidden="true">
+                <div class="chip-board"><i class="chip-trace trace-one"></i><i class="chip-trace trace-two"></i><i class="chip-trace trace-three"></i><div class="chip-core"><span>&lt;/&gt;</span><small>LEARN · BUILD</small></div><i class="chip-node node-one"></i><i class="chip-node node-two"></i><i class="chip-node node-three"></i></div>
+                <span class="chip-caption">CLASSROOM LAB / 01</span>
+              </div>
               <div class="terminal-bar">
                 <div class="window-dots"><i></i><i></i><i></i></div>
                 <span>portfolio.config.js</span>
@@ -200,16 +204,18 @@
             <div><span class="heading-icon" aria-hidden="true">&#10003;</span><p class="mono-label">performance_report</p><h2>ผลการปฏิบัติงาน<br>ตามมาตรฐานตำแหน่ง</h2></div>
             <p>โครงสร้างหัวข้อคงเดิมทุกปี ส่วนรายละเอียดและหลักฐานจะแยกตามรอบการประเมิน</p>
           </div>
-          <nav class="criteria-mobile-nav" aria-label="เลือกด้านการประเมิน">
-            <div class="criteria-mobile-scroll">
-              <button class="active" type="button" data-criteria-filter="all">ทั้งหมด <span>15</span></button>
-              <button type="button" data-criteria-filter="1">ด้าน 1 <span>8</span></button>
-              <button type="button" data-criteria-filter="2">ด้าน 2 <span>4</span></button>
-              <button type="button" data-criteria-filter="3">ด้าน 3 <span>3</span></button>
+          <div class="performance-layout">
+            <nav class="criteria-rail" aria-label="เลือกด้านการประเมิน">
+              <button type="button" data-criteria-filter="all" aria-pressed="true">ทั้งหมด <span>15</span></button>
+              <button type="button" data-criteria-filter="1" aria-pressed="false">ด้าน 1 <span>8</span></button>
+              <button type="button" data-criteria-filter="2" aria-pressed="false">ด้าน 2 <span>4</span></button>
+              <button type="button" data-criteria-filter="3" aria-pressed="false">ด้าน 3 <span>3</span></button>
+            </nav>
+            <div class="performance-results">
+              <p id="criteriaMobileStatus" class="criteria-status" role="status" aria-live="polite"></p>
+              <div class="criteria-list" id="criteriaList"></div>
             </div>
-            <small id="criteriaMobileStatus" role="status" aria-live="polite">แตะหัวข้อเพื่อเปิดดูหลักฐาน</small>
-          </nav>
-          <div class="criteria-list" id="criteriaList"></div>
+          </div>
         </section>
 
         <section class="page-section" id="challenge" data-title="ประเด็นท้าทาย">

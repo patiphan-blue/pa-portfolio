@@ -398,7 +398,7 @@ function applyCriteriaFilter(moveToResults = false) {
   });
   const visibleCount = activeCriteriaGroup === "all" ? 15 : criteria.filter(item => item[0].startsWith(`${activeCriteriaGroup}.`)).length;
   const status = document.querySelector("#criteriaMobileStatus");
-  if (status) status.textContent = `แสดง ${visibleCount} หัวข้อ · แตะหัวข้อเพื่อเปิดดูหลักฐาน`;
+  if (status) status.textContent = `${activeCriteriaGroup === "all" ? "ครบทั้ง 3 ด้าน" : `ด้านที่ ${activeCriteriaGroup}`} · ${visibleCount} หัวข้อ · เปลี่ยนด้านได้จากเมนูด้านซ้าย`;
   if (moveToResults) {
     requestAnimationFrame(() => {
       const firstGroup = document.querySelector("#criteriaList .criteria-group:not([hidden])");
@@ -655,7 +655,13 @@ document.addEventListener("click", async event => {
   const criteriaFilter = event.target.closest("[data-criteria-filter]");
   if (criteriaFilter) {
     activeCriteriaGroup = criteriaFilter.dataset.criteriaFilter;
+    document.body.classList.remove("menu-open");
+    document.querySelector("#menuBtn").setAttribute("aria-expanded", "false");
     applyCriteriaFilter(true);
+    if (matchMedia("(max-width: 820px)").matches) {
+      const heading = document.querySelector("#criteriaList .criteria-group:not([hidden]) h3");
+      if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); }
+    }
   }
 
   const galleryImage = event.target.closest("[data-gallery-image]");
@@ -1026,6 +1032,21 @@ async function init() {
   setInterval(updateClock, 30000);
   const initial = location.hash.slice(1);
   navigate(document.querySelector(`#${CSS.escape(initial)}`)?.classList.contains("page-section") ? initial : "overview", false);
+}
+
+// Pointer-only tilt: no animation loop or motion on touch/reduced-motion devices.
+const labCard = document.querySelector(".hero .terminal-card");
+const labMotion = matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
+if (labCard) {
+  const resetLabTilt = () => { labCard.style.removeProperty("--lab-rx"); labCard.style.removeProperty("--lab-ry"); };
+  labCard.addEventListener("pointermove", event => {
+    if (!labMotion.matches || editMode) { resetLabTilt(); return; }
+    const rect = labCard.getBoundingClientRect();
+    labCard.style.setProperty("--lab-rx", `${(0.5 - (event.clientY - rect.top) / rect.height) * 5}deg`);
+    labCard.style.setProperty("--lab-ry", `${((event.clientX - rect.left) / rect.width - 0.5) * 6}deg`);
+  });
+  labCard.addEventListener("pointerleave", resetLabTilt);
+  labMotion.addEventListener("change", resetLabTilt);
 }
 
 init();
