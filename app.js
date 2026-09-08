@@ -369,7 +369,8 @@ function renderCriteria() {
         </div>
         <div class="criterion-visuals" data-criterion-gallery>
           ${main ? `
-            <div class="zoom-frame" data-zoom-frame><img src="${main.src}" alt="${title} ภาพหลัก" loading="lazy" decoding="async" data-criterion-main><span class="zoom-hint">เลื่อนเมาส์เพื่อซูม · คลิกเพื่อดูเต็มจอ</span></div>
+            <button class="zoom-frame" type="button" data-zoom-frame aria-label="เปิดหลักฐานหัวข้อ ${number} แบบเต็มจอ"><img src="${main.src}" alt="${escapeHTML(main.title)}" loading="lazy" decoding="async" data-criterion-main><span class="zoom-hint">เปิดเต็มจอ ↗</span></button>
+            <div class="evidence-caption"><strong data-evidence-caption>${escapeHTML(main.title)}</strong><span data-evidence-counter aria-live="polite">1 / ${imgs.length}</span></div>
             <div class="criterion-thumbs">${imgs.map((item, i) => `
               <div class="criterion-thumb-wrap">
                 <button class="criterion-thumb ${i === 0 ? "active" : ""}" type="button" data-thumb-src="${item.src}" data-thumb-title="${escapeHTML(item.title)}" data-thumb-index="${i}" aria-label="ดู${title} ภาพที่ ${i + 1}" aria-pressed="${i === 0 ? "true" : "false"}"><img src="${item.src}" alt="" loading="lazy" decoding="async"></button>
@@ -625,7 +626,7 @@ function updateLightbox() {
   document.querySelector("#lightboxImg").src = item.src;
   document.querySelector("#lightboxImg").alt = item.category === "challenge" ? "ภาพประกอบประเด็นท้าทายแบบเต็มจอ" : item.title;
   document.querySelector("#lightboxTitle").textContent = item.category === "challenge" ? "" : item.title;
-  document.querySelector("#lightboxMeta").textContent = item.category ? `${categoryLabel(item.category)} · รอบ ${item.round}` : "หลักฐานประกอบ";
+  document.querySelector("#lightboxMeta").textContent = `${lightboxIndex + 1} / ${lightboxItems.length} · ${item.category ? `${categoryLabel(item.category)} · รอบ ${item.round}` : "หลักฐานประกอบ"}`;
 }
 
 function moveLightbox(direction) {
@@ -681,16 +682,19 @@ document.addEventListener("click", async event => {
   if (thumb) {
     const gallery = thumb.closest("[data-criterion-gallery]");
     const main = gallery.querySelector("[data-criterion-main]");
-    main.animate([{ opacity: .45, transform: "scale(.98)" }, { opacity: 1, transform: "scale(1)" }], { duration: 260, easing: "cubic-bezier(.22,1,.36,1)" });
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) main.animate([{ opacity: .45 }, { opacity: 1 }], { duration: 200, easing: "ease-out" });
     main.src = thumb.dataset.thumbSrc;
+    main.alt = thumb.dataset.thumbTitle;
     main.dataset.activeIndex = thumb.dataset.thumbIndex;
+    gallery.querySelector("[data-evidence-caption]").textContent = thumb.dataset.thumbTitle;
+    gallery.querySelector("[data-evidence-counter]").textContent = `${Number(thumb.dataset.thumbIndex) + 1} / ${gallery.querySelectorAll('[data-thumb-src]').length}`;
     gallery.querySelectorAll(".criterion-thumb").forEach(button => {
       const active = button === thumb;
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", String(active));
     });
   }
-  const criterionMain = event.target.closest("[data-criterion-main]");
+  const criterionMain = event.target.closest("[data-zoom-frame]")?.querySelector("[data-criterion-main]");
   if (criterionMain) {
     const gallery = criterionMain.closest("[data-criterion-gallery]");
     const items = [...gallery.querySelectorAll("[data-thumb-src]")].map((button, index) => ({ src: button.dataset.thumbSrc, title: button.dataset.thumbTitle || `${criterionMain.alt.replace(" ภาพหลัก", "")} · ภาพที่ ${index + 1}` }));
