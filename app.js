@@ -152,6 +152,15 @@ function loadState() {
     if (!Array.isArray(merged.schedule) || merged.schedule.some(row => row.length < 11) || merged.schedule.some(row => row.some(cell => String(cell).includes("ว31103")))) {
       merged.schedule = structuredClone(defaults.schedule);
     }
+    // One-time repair for the published round's previously saved empty report.
+    // Keep nonempty reports and respect intentional clears after this repair.
+    if (!saved?.participationRound2Repaired) {
+      const report = merged.rounds[2].participationSummary;
+      if (report == null || (typeof report === "string" && !report.trim())) {
+        merged.rounds[2].participationSummary = participationReport;
+      }
+      merged.participationRound2Repaired = true;
+    }
     return merged;
   } catch { return structuredClone(defaults); }
 }
