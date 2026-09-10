@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260910-components1">
+  <link rel="stylesheet" href="styles.css?v=20260910-published1">
 </head>
 <body>
   <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
@@ -83,6 +83,7 @@
         </div>
       </header>
 
+      <p id="unpublishedNotice" role="status" hidden>ยังไม่มีรอบการประเมินที่เปิดเผยแพร่</p>
       <main id="main" tabindex="-1">
         <section class="page-section active" id="overview" data-title="ภาพรวม">
           <div class="hero">
@@ -132,16 +133,16 @@
             <div>
               <p class="mono-label">annual_roadmap</p>
               <span class="heading-icon" aria-hidden="true">&#8635;</span>
-              <h2>หนึ่งปี สองรอบ<br>เรื่องราวเดียวกัน</h2>
+              <h2 id="roadmapTitle">หนึ่งปี สองรอบ<br>เรื่องราวเดียวกัน</h2>
             </div>
-            <p>แต่ละรอบเก็บเนื้อหาและหลักฐานแยกกัน คุณจึงอัปเดตข้อมูลได้โดยไม่ทับงานเดิม และสลับนำเสนอได้ทันที</p>
+            <p id="roadmapDescription">แต่ละรอบเก็บเนื้อหาและหลักฐานแยกกัน คุณจึงอัปเดตข้อมูลได้โดยไม่ทับงานเดิม และสลับนำเสนอได้ทันที</p>
           </div>
           <div class="timeline">
             <div class="timeline-track"><i></i></div>
-            <article class="timeline-item active">
+            <article class="timeline-item active" data-timeline-round="1">
               <span>01</span><div><small>รอบที่ 1 · <span data-period-round="1"></span></small><h3>วางระบบและสร้างพื้นฐาน</h3><p>กำหนดข้อตกลง พัฒนาสื่อ ทดลองใช้ และเก็บข้อมูลระหว่างทาง</p></div>
             </article>
-            <article class="timeline-item">
+            <article class="timeline-item" data-timeline-round="2">
               <span>02</span><div><small>รอบที่ 2 · <span data-period-round="2"></span></small><h3>ต่อยอดและสรุปผลลัพธ์</h3><p>ปรับปรุงกระบวนการ วิเคราะห์ผล และขยายผลสู่ชุมชนการเรียนรู้</p></div>
             </article>
           </div>
@@ -396,6 +397,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app.js?v=20260910-participation2"></script>
+  <script defer src="app.js?v=20260910-upload1"></script>
 </body>
 </html>

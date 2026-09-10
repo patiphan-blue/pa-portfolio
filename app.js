@@ -120,6 +120,8 @@ let carouselIndex = 0;
 let carouselPointerStart = null;
 let activeCriteriaGroup = "all";
 let saveTimer;
+const criterionUploadStatus = new Map();
+const criterionUploadsInProgress = new Set();
 
 function loadState() {
   try {
@@ -300,23 +302,34 @@ function formatPeriod(round) {
 }
 
 function applyState() {
+  const publishedRounds = [1, 2].filter(round => state.roundVisibility[round]);
+  if (MANAGE_MODE && ![1, 2].includes(state.round)) state.round = 1;
+  if (!MANAGE_MODE && !publishedRounds.includes(state.round)) state.round = publishedRounds[0] ?? 0;
   document.querySelector("#yearInput").value = state.year;
   document.querySelectorAll("[data-year]").forEach(el => el.textContent = state.year);
-  const publishedRounds = [1, 2].filter(round => state.roundVisibility[round]);
   document.body.classList.toggle("single-published-round", publishedRounds.length === 1);
+  document.body.classList.toggle("no-published-round", !MANAGE_MODE && publishedRounds.length === 0);
+  document.querySelector("#unpublishedNotice").hidden = MANAGE_MODE || publishedRounds.length > 0;
+  document.querySelectorAll(".timeline-item[data-timeline-round]").forEach(el => {
+    const round = Number(el.dataset.timelineRound);
+    el.hidden = !MANAGE_MODE && !publishedRounds.includes(round);
+    el.classList.toggle("active", round === state.round);
+  });
+  document.querySelector("#roadmapTitle").textContent = !MANAGE_MODE && publishedRounds.length === 1 ? `แผนงานรอบที่ ${state.round}` : "หนึ่งปี สองรอบ เรื่องราวเดียวกัน";
+  document.querySelector("#roadmapDescription").hidden = !MANAGE_MODE && publishedRounds.length < 2;
   document.querySelectorAll(".round-btn").forEach(btn => {
     const round = Number(btn.dataset.round);
     btn.hidden = !MANAGE_MODE && !state.roundVisibility[round];
     btn.classList.toggle("active", round === state.round);
     btn.setAttribute("aria-pressed", String(round === state.round));
   });
+  if (!MANAGE_MODE && !publishedRounds.length) return;
   document.querySelector("#roundPublishedInput").checked = Boolean(state.roundVisibility[state.round]);
   document.querySelectorAll("[data-round-label]").forEach(el => el.textContent = `รอบที่ ${state.round}`);
   document.querySelectorAll("[data-period-label]").forEach(el => el.textContent = formatPeriod(state.round));
   document.querySelectorAll("[data-period-round]").forEach(el => el.textContent = formatPeriod(Number(el.dataset.periodRound)));
   document.querySelector("#roundStartInput").value = state.roundPeriods[state.round].start;
   document.querySelector("#roundEndInput").value = state.roundPeriods[state.round].end;
-  document.querySelectorAll(".timeline-item").forEach((el, i) => el.classList.toggle("active", i + 1 === state.round));
   const track = document.querySelector(".timeline-track i");
   if (track) track.style.transform = state.round === 2 ? "translateX(100%) translateY(-1px)" : "translateY(-1px)";
 
@@ -375,9 +388,10 @@ function renderCriteria() {
             <small>หลักฐานรอบที่ ${state.round} · ${imgs.length} รายการ</small>
             <div class="criterion-tools edit-only">
               <label class="btn primary criterion-upload" for="upload-${number.replace(".", "-")}">＋ เพิ่มภาพในหัวข้อ ${number}</label>
-              <input id="upload-${number.replace(".", "-")}" type="file" accept="image/*" multiple hidden data-criterion-upload="${number}">
+              <input id="upload-${number.replace(".", "-")}" type="file" accept="image/*" multiple hidden data-criterion-upload="${number}" ${criterionUploadsInProgress.has(`${state.round}/${number}`) ? "disabled" : ""}>
               <span>เลือกได้หลายภาพ</span>
             </div>
+            <p class="manager-only" role="status" data-upload-status="${number}">${escapeHTML(criterionUploadStatus.get(`${state.round}/${number}`) || "")}</p>
           </div>
         </div>
         <div class="criterion-visuals" data-criterion-gallery>
@@ -632,31 +646,61 @@ async function handleFiles(files) {
 }
 
 async function handleCriterionFiles(files, criterion) {
+  if (!MANAGE_MODE || !criteria.some(item => item[0] === criterion)) return;
+  const round = state.round;
+  const uploadKey = `${round}/${criterion}`;
+  if (criterionUploadsInProgress.has(uploadKey)) return toast("หัวข้อนี้กำลังอัปโหลด กรุณารอสักครู่");
   const valid = [...files].filter(file => file.type.startsWith("image/"));
   if (!valid.length) return toast("กรุณาเลือกไฟล์ภาพ");
+  criterionUploadsInProgress.add(uploadKey);
+  const report = message => {
+    criterionUploadStatus.set(uploadKey, message);
+    if (state.round === round) {
+      const status = document.querySelector(`[data-upload-status="${criterion}"]`);
+      if (status) status.textContent = message;
+    }
+  };
+  let added = 0;
+  let lastAdded;
+  const failures = [];
+  report(`กำลังอัปโหลด 0/${valid.length} ภาพ · รอบที่ ${round}`);
   toast(`กำลังเพิ่มภาพในหัวข้อ ${criterion}...`);
   const category = criterion.startsWith("1.") ? "teaching" : criterion.startsWith("2.") ? "support" : "development";
+  try {
   for (const file of valid) {
     const item = {
       id: crypto.randomUUID(),
       title: file.name.replace(/\.[^.]+$/, ""),
       category,
       criterion,
-      round: state.round,
+      round,
       _file: file,
       createdAt: Date.now() + Math.random()
     };
     try {
       await putEvidence(item);
       evidence.push(item);
+      added++;
+      lastAdded = item;
     } catch (error) {
       console.error(error);
-      toast(`อัปโหลด ${file.name} ไม่สำเร็จ: ${error.message}`);
+      failures.push(`ภาพที่ ${added + failures.length + 1}: ${error?.message || "ไม่ทราบสาเหตุ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่"}`);
     }
+    report(`ประมวลผล ${added + failures.length}/${valid.length} ภาพ · สำเร็จ ${added} ภาพ`);
   }
+  } finally { criterionUploadsInProgress.delete(uploadKey); }
+  const result = `หัวข้อ ${criterion} · รอบที่ ${round}: บันทึกสำเร็จ ${added}/${valid.length} ภาพ${failures.length ? ` · ไม่สำเร็จ ${failures.length} ภาพ — ${failures.join("; ")}` : ""}`;
+  report(result);
   renderCriteria();
   renderGallery();
-  toast(`เพิ่ม ${valid.length} ภาพในหัวข้อ ${criterion} แล้ว`);
+  if (lastAdded && state.round === round) {
+    const article = document.querySelector(`[data-criterion-number="${criterion}"]`);
+    article?.classList.add("expanded");
+    article?.querySelector(".criterion-toggle")?.setAttribute("aria-expanded", "true");
+    const thumb = [...(article?.querySelectorAll("[data-thumb-src]") || [])].find(button => button.dataset.thumbSrc === lastAdded.src);
+    thumb?.click();
+  }
+  toast(failures.length ? `อัปโหลดไม่สำเร็จ ${failures.length} ภาพ — ดูสาเหตุใต้ปุ่มเพิ่มภาพ` : `บันทึกสำเร็จ ${added} ภาพในหัวข้อ ${criterion} รอบที่ ${round}`);
 }
 
 function fileToDataURL(file) {
@@ -695,7 +739,13 @@ document.addEventListener("click", async event => {
   const jump = event.target.closest(".jump-btn");
   if (jump) navigate(jump.dataset.target);
   const round = event.target.closest(".round-btn");
-  if (round) { state.round = Number(round.dataset.round); saveState(); applyState(); }
+  if (round) {
+    const requestedRound = Number(round.dataset.round);
+    if (![1, 2].includes(requestedRound) || (!MANAGE_MODE && !state.roundVisibility[requestedRound])) return;
+    state.round = requestedRound;
+    if (MANAGE_MODE) saveState();
+    applyState();
+  }
   if (event.target.closest("#editBtn") && MANAGE_MODE) setEditMode(!editMode);
   if (event.target.closest("#menuBtn")) {
     const opened = document.body.classList.toggle("menu-open");
@@ -906,12 +956,14 @@ document.querySelector("#challengeEvidenceFile").addEventListener("change", asyn
   renderGallery();
   toast(`เพิ่มภาพประกอบในรอบที่ ${state.round} แล้ว`);
 });
-document.querySelector("#criteriaList").addEventListener("change", event => {
+document.querySelector("#criteriaList").addEventListener("change", async event => {
   if (!MANAGE_MODE) return;
   const input = event.target.closest("[data-criterion-upload]");
   if (!input) return;
-  handleCriterionFiles(input.files, input.dataset.criterionUpload);
-  input.value = "";
+  const files = [...input.files];
+  input.disabled = true;
+  try { await handleCriterionFiles(files, input.dataset.criterionUpload); }
+  finally { input.value = ""; input.disabled = false; }
 });
 document.querySelector("#profileUpload").addEventListener("change", async event => {
   if (!MANAGE_MODE) return;

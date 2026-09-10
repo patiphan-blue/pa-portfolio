@@ -65,6 +65,12 @@ body.manager-mode .publish-toggle { display: flex; }
 .publish-toggle small { color: #8f8e86; font-size: 9px; }
 body.single-published-round.viewer-mode .round-switch { display: none; }
 .round-btn[hidden] { display: none; }
+.timeline-item[hidden], #roadmapDescription[hidden], #unpublishedNotice[hidden] { display: none; }
+body.single-published-round.viewer-mode .timeline { grid-template-columns: 1fr; }
+body.single-published-round.viewer-mode .timeline-track { display: none; }
+body.no-published-round.viewer-mode #main,
+body.no-published-round.viewer-mode .cycle-card { display: none; }
+#unpublishedNotice { margin: 40px 24px; font-size: 1.25rem; }
 .round-switch:has(.round-btn[hidden]) { grid-template-columns: 1fr; }
 .year-label { display: block; margin-top: 14px; color: #929087; font-size: 11px; }
 .year-input { width: 100%; padding: 4px 0; border: 0; border-bottom: 1px solid #44453e; background: transparent; color: var(--canvas); font: 500 15px "JetBrains Mono", monospace; }
