@@ -236,7 +236,7 @@ async function getUploadedEvidence() {
     const { data: publicData } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(file.path);
     return {
       id,
-      title: decodeURIComponent(encodedTitle),
+      title: decodeStorageTitle(encodedTitle),
       category: /^\d+\./.test(group) ? (group.startsWith("1.") ? "teaching" : group.startsWith("2.") ? "support" : "development") : group,
       criterion: /^\d+\./.test(group) ? group : undefined,
       round,
@@ -247,11 +247,27 @@ async function getUploadedEvidence() {
   });
 }
 
+function encodeStorageTitle(title) {
+  const bytes = new TextEncoder().encode(String(title).trim() || "หลักฐาน");
+  return "title64_" + btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(""))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function decodeStorageTitle(title) {
+  try {
+    if (title.startsWith("title64_")) {
+      const encoded = title.slice(8).replace(/-/g, "+").replace(/_/g, "/");
+      return new TextDecoder().decode(Uint8Array.from(atob(encoded), char => char.charCodeAt(0)));
+    }
+    return decodeURIComponent(title);
+  } catch { return title; }
+}
+
 async function putEvidence(item) {
   if (!supabaseClient || !MANAGE_MODE) throw new Error("กรุณาเข้าสู่ระบบก่อนอัปโหลด");
   const group = encodeURIComponent(item.criterion || item.category || "teaching");
   const extension = item._file?.name.split(".").pop()?.toLowerCase() || item.storagePath?.split(".").pop() || "jpg";
-  const safeTitle = encodeURIComponent(item.title.trim() || "หลักฐาน");
+  const safeTitle = encodeStorageTitle(item.title);
   const nextPath = `${item.round}/${group}/${item.id}--${safeTitle}.${extension}`;
 
   if (item._file) {
