@@ -310,7 +310,7 @@ function applyState() {
   document.querySelectorAll(".editable[data-field]").forEach(el => {
     const field = el.dataset.field;
     const value = el.classList.contains("round-editable") ? state.rounds[state.round][field] : state.fields[field];
-    if (value !== undefined && document.activeElement !== el) el.textContent = value;
+    if (document.activeElement !== el && (value !== undefined || el.hasAttribute("data-empty-text"))) el.textContent = value ?? "";
   });
   renderSchedule();
   renderCriteria();
@@ -416,7 +416,7 @@ function applyCriteriaFilter(moveToResults = false) {
 }
 
 function categoryLabel(category) {
-  return ({ teaching: "การจัดการเรียนรู้", support: "ส่งเสริมและสนับสนุน", development: "พัฒนาตนเอง", challenge: "ประเด็นท้าทาย" })[category] || "หลักฐาน";
+  return ({ teaching: "การจัดการเรียนรู้", support: "ส่งเสริมและสนับสนุน", development: "พัฒนาตนเอง", challenge: "ประเด็นท้าทาย", participation: "องค์ประกอบที่ 2", ethics: "องค์ประกอบที่ 3" })[category] || "หลักฐาน";
 }
 
 function renderGallery() {
@@ -437,7 +437,49 @@ function renderGallery() {
   document.querySelector("#evidenceCount").textContent = `${roundTotal} รายการ`;
   renderCarousel();
   renderChallengePreview();
+  renderComponentEvidence();
 }
+
+function renderComponentEvidence() {
+  for (const category of ["participation", "ethics"]) {
+    const items = evidence.filter(item => item.round === state.round && item.category === category);
+    document.querySelector(`[data-component-count="${category}"]`).textContent = `${items.length} ภาพ · รอบที่ ${state.round}`;
+    document.querySelector(`[data-component-gallery="${category}"]`).innerHTML = items.length
+      ? items.map((item, index) => `<figure class="component-photo"><button type="button" data-component-image="${escapeHTML(item.id)}" aria-label="เปิดหลักฐาน${categoryLabel(category)} ภาพที่ ${index + 1} แบบเต็มจอ"><img src="${escapeHTML(item.src)}" alt="หลักฐาน${categoryLabel(category)} ภาพที่ ${index + 1}" loading="lazy" decoding="async"></button><button class="manager-only text-btn" type="button" data-delete="${escapeHTML(item.id)}" aria-label="ลบหลักฐานภาพที่ ${index + 1}">ลบภาพ</button></figure>`).join("")
+      : `<p class="component-empty">ยังไม่มีหลักฐานประกอบในรอบที่ ${state.round}</p>`;
+  }
+}
+
+document.addEventListener("change", async event => {
+  const input = event.target.closest("[data-component-upload]");
+  if (!MANAGE_MODE || !input) return;
+  const category = input.dataset.componentUpload;
+  if (!["participation", "ethics"].includes(category)) return;
+  const round = state.round;
+  const files = [...input.files].filter(file => file.type.startsWith("image/"));
+  if (!files.length) { input.value = ""; return toast("กรุณาเลือกไฟล์ภาพ"); }
+  input.disabled = true;
+  let added = 0;
+  toast(`กำลังเพิ่มหลักฐาน${categoryLabel(category)}...`);
+  try {
+    for (const file of files) {
+      const item = { id: crypto.randomUUID(), title: file.name.replace(/\.[^.]+$/, ""), category, round, _file: file, createdAt: Date.now() };
+      try { await putEvidence(item); evidence.push(item); added++; }
+      catch (error) { console.error(error); }
+    }
+    renderGallery();
+    toast(`เพิ่มหลักฐานรอบที่ ${round} สำเร็จ ${added}/${files.length} ภาพ${added < files.length ? " · กรุณาลองอัปโหลดภาพที่ไม่สำเร็จอีกครั้ง" : ""}`);
+  } finally { input.disabled = false; input.value = ""; }
+});
+
+document.addEventListener("click", event => {
+  const button = event.target.closest("[data-component-image]");
+  if (!button) return;
+  const item = evidence.find(entry => entry.id === button.dataset.componentImage);
+  if (!item) return;
+  const items = evidence.filter(entry => entry.round === state.round && entry.category === item.category);
+  openLightbox(items, items.findIndex(entry => entry.id === item.id));
+});
 
 function renderCarousel() {
   const items = evidence.filter(item => item.round === state.round).slice(0, 6);
@@ -1035,7 +1077,7 @@ async function init() {
   updateClock();
   setInterval(updateClock, 30000);
   const initial = location.hash.slice(1);
-  navigate(document.querySelector(`#${CSS.escape(initial)}`)?.classList.contains("page-section") ? initial : "overview", false);
+  navigate(document.getElementById(initial)?.classList.contains("page-section") ? initial : "overview", false);
 }
 
 // Pointer-only tilt: no animation loop or motion on touch/reduced-motion devices.

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260908-gallery2">
+  <link rel="stylesheet" href="styles.css?v=20260910-components1">
 </head>
 <body>
   <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
@@ -50,8 +50,13 @@
       <nav class="main-nav" aria-label="เมนูส่วนหลัก">
         <a class="nav-link active" href="#overview" data-section="overview"><span>⌂</span>ภาพรวม</a>
         <a class="nav-link" href="#profile" data-section="profile"><span>◎</span>ข้อมูลและภาระงาน</a>
-        <a class="nav-link" href="#performance" data-section="performance"><span>◇</span>ผลการปฏิบัติงาน</a>
-        <a class="nav-link" href="#challenge" data-section="challenge"><span>△</span>ประเด็นท้าทาย</a>
+        <div class="nav-component" role="group" aria-labelledby="componentOneNav">
+          <p id="componentOneNav" class="nav-component-label"><strong>องค์ประกอบที่ 1</strong>ประสิทธิภาพและประสิทธิผล<br>การปฏิบัติงานตามมาตรฐานตำแหน่ง</p>
+          <a class="nav-link" href="#performance" data-section="performance"><span>◇</span>ผลการปฏิบัติงาน · ด้าน 1–3</a>
+          <a class="nav-link" href="#challenge" data-section="challenge"><span>△</span>ประเด็นท้าทาย</a>
+        </div>
+        <a class="nav-link component-link" href="#participation" data-section="participation"><span aria-hidden="true">◎</span><div><strong>องค์ประกอบที่ 2</strong><small>การมีส่วนร่วมในการพัฒนาการศึกษา</small></div></a>
+        <a class="nav-link component-link" href="#ethics" data-section="ethics"><span aria-hidden="true">◇</span><div><strong>องค์ประกอบที่ 3</strong><small>การปฏิบัติตนในการรักษาวินัย คุณธรรม จริยธรรม และจรรยาบรรณวิชาชีพ</small></div></a>
         <a class="nav-link" href="#evidence" data-section="evidence"><span>▦</span>คลังหลักฐาน</a>
       </nav>
 
@@ -200,6 +205,7 @@
         </section>
 
         <section class="page-section" id="performance" data-title="ผลการปฏิบัติงาน">
+          <p class="component-context">องค์ประกอบที่ 1 · ประสิทธิภาพและประสิทธิผลการปฏิบัติงานตามมาตรฐานตำแหน่ง</p>
           <div class="section-intro">
             <div><span class="heading-icon" aria-hidden="true">&#10003;</span><p class="mono-label">performance_report</p><h2>ผลการปฏิบัติงาน<br>ตามมาตรฐานตำแหน่ง</h2></div>
             <p>โครงสร้างหัวข้อคงเดิมทุกปี ส่วนรายละเอียดและหลักฐานจะแยกตามรอบการประเมิน</p>
@@ -219,6 +225,7 @@
         </section>
 
         <section class="page-section" id="challenge" data-title="ประเด็นท้าทาย">
+          <p class="component-context">องค์ประกอบที่ 1 · ประสิทธิภาพและประสิทธิผลการปฏิบัติงานตามมาตรฐานตำแหน่ง</p>
           <div class="challenge-hero">
             <div>
               <span class="heading-icon" aria-hidden="true">&#9889;</span>
@@ -263,6 +270,34 @@
           </div>
         </section>
 
+        <section class="page-section component-page" id="participation" data-title="องค์ประกอบที่ 2">
+          <header class="component-heading"><p class="component-context">องค์ประกอบที่ 2</p><h2>การมีส่วนร่วมในการพัฒนาการศึกษา</h2><p><span data-round-label></span> · <span data-period-label></span></p></header>
+          <div class="component-report">
+            <h3 id="participationSummaryLabel">ผลการปฏิบัติงาน</h3>
+            <p class="manager-only component-help">กด “แก้ไขแฟ้ม” แล้วคลิกพื้นที่ด้านล่างเพื่อกรอกข้อมูลของรอบนี้</p>
+            <div class="editable round-editable component-text" data-field="participationSummary" data-empty-text="ยังไม่ได้ระบุผลการปฏิบัติงานในรอบนี้" aria-labelledby="participationSummaryLabel"></div>
+          </div>
+          <div class="component-evidence">
+            <div class="component-evidence-head"><h3>หลักฐานประกอบ</h3><span data-component-count="participation"></span></div>
+            <div class="manager-only component-upload"><label class="btn primary" for="participationUpload">＋ เพิ่มภาพหลักฐาน</label><input id="participationUpload" type="file" accept="image/*" multiple hidden data-component-upload="participation"></div>
+            <div class="component-gallery" data-component-gallery="participation"></div>
+          </div>
+        </section>
+
+        <section class="page-section component-page" id="ethics" data-title="องค์ประกอบที่ 3">
+          <header class="component-heading"><p class="component-context">องค์ประกอบที่ 3</p><h2>การปฏิบัติตนในการรักษาวินัย คุณธรรม จริยธรรม และจรรยาบรรณวิชาชีพ</h2><p><span data-round-label></span> · <span data-period-label></span></p></header>
+          <div class="component-report">
+            <h3 id="ethicsSummaryLabel">ผลการปฏิบัติงาน</h3>
+            <p class="manager-only component-help">กด “แก้ไขแฟ้ม” แล้วคลิกพื้นที่ด้านล่างเพื่อกรอกข้อมูลของรอบนี้</p>
+            <div class="editable round-editable component-text" data-field="ethicsSummary" data-empty-text="ยังไม่ได้ระบุผลการปฏิบัติงานในรอบนี้" aria-labelledby="ethicsSummaryLabel"></div>
+          </div>
+          <div class="component-evidence">
+            <div class="component-evidence-head"><h3>หลักฐานประกอบ</h3><span data-component-count="ethics"></span></div>
+            <div class="manager-only component-upload"><label class="btn primary" for="ethicsUpload">＋ เพิ่มภาพหลักฐาน</label><input id="ethicsUpload" type="file" accept="image/*" multiple hidden data-component-upload="ethics"></div>
+            <div class="component-gallery" data-component-gallery="ethics"></div>
+          </div>
+        </section>
+
         <section class="page-section" id="evidence" data-title="คลังหลักฐาน">
           <div class="section-intro evidence-heading">
             <div><span class="heading-icon" aria-hidden="true">&#9638;</span><p class="mono-label">evidence.repository</p><h2>คลังหลักฐาน</h2></div>
@@ -295,6 +330,8 @@
               <button class="filter-btn" data-filter="support" type="button" aria-pressed="false">ส่งเสริมและสนับสนุน</button>
               <button class="filter-btn" data-filter="development" type="button" aria-pressed="false">พัฒนาตนเอง</button>
               <button class="filter-btn" data-filter="challenge" type="button" aria-pressed="false">ประเด็นท้าทาย</button>
+              <button class="filter-btn" data-filter="participation" type="button" aria-pressed="false">องค์ประกอบที่ 2</button>
+              <button class="filter-btn" data-filter="ethics" type="button" aria-pressed="false">องค์ประกอบที่ 3</button>
             </div>
             <span id="galleryCount" role="status" aria-live="polite">0 รายการ</span>
           </div>
@@ -359,6 +396,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app.js?v=20260908-gallery1"></script>
+  <script defer src="app.js?v=20260910-components1"></script>
 </body>
 </html>
