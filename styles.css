@@ -65,6 +65,11 @@ body.manager-mode .publish-toggle { display: flex; }
 .publish-toggle small { color: #8f8e86; font-size: 9px; }
 body.single-published-round.viewer-mode .round-switch { display: none; }
 .round-btn[hidden] { display: none; }
+.reviewer-sync { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 20px 24px; }
+.manager-mode .reviewer-sync { display: none; }
+.viewer-mode.reviewer-pending #main,
+.viewer-mode.reviewer-pending .cycle-card,
+.viewer-mode.reviewer-pending #unpublishedNotice { display: none; }
 .timeline-item[hidden], #roadmapDescription[hidden], #unpublishedNotice[hidden] { display: none; }
 body.single-published-round.viewer-mode .timeline { grid-template-columns: 1fr; }
 body.single-published-round.viewer-mode .timeline-track { display: none; }

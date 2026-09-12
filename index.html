@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20260910-published1">
+  <link rel="stylesheet" href="styles.css?v=20260912-sync1">
 </head>
-<body>
+<body class="reviewer-pending">
   <a class="skip-link" href="#main">ข้ามไปยังเนื้อหา</a>
 
   <div class="app-shell">
@@ -83,6 +83,7 @@
         </div>
       </header>
 
+      <div class="reviewer-sync"><span id="reviewerSyncStatus" role="status">กำลังโหลดข้อมูลล่าสุดจากระบบ…</span><button class="btn ghost" id="refreshReviewer" type="button">↻ อัปเดตข้อมูล</button></div>
       <p id="unpublishedNotice" role="status" hidden>ยังไม่มีรอบการประเมินที่เปิดเผยแพร่</p>
       <main id="main" tabindex="-1">
         <section class="page-section active" id="overview" data-title="ภาพรวม">
@@ -397,6 +398,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script defer src="app.js?v=20260910-upload2"></script>
+  <script defer src="app.js?v=20260912-sync1"></script>
 </body>
 </html>

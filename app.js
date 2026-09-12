@@ -123,9 +123,9 @@ let saveTimer;
 const criterionUploadStatus = new Map();
 const criterionUploadsInProgress = new Set();
 
-function loadState() {
+function loadState(savedOverride) {
   try {
-    const saved = JSON.parse(localStorage.getItem(APP_KEY));
+    const saved = savedOverride === undefined ? JSON.parse(localStorage.getItem(APP_KEY)) : savedOverride;
     const merged = saved ? {
       ...structuredClone(defaults),
       ...saved,
@@ -213,15 +213,19 @@ async function getUploadedEvidence() {
   if (!supabaseClient) return [];
   const files = [];
   async function walk(prefix = "") {
+    for (let offset = 0; ; offset += 100) {
     const { data, error } = await supabaseClient.storage.from(STORAGE_BUCKET).list(prefix, {
       limit: 100,
-      sortBy: { column: "created_at", order: "desc" }
+      offset,
+      sortBy: { column: "name", order: "asc" }
     });
     if (error) throw error;
     for (const entry of data || []) {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.id) files.push({ ...entry, path });
       else await walk(path);
+    }
+    if ((data || []).length < 100) break;
     }
   }
   await walk();
@@ -1143,6 +1147,14 @@ async function init() {
     else toast("ลิงก์ตั้งรหัสผ่านไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่");
   }
   if (REQUESTED_MANAGE_MODE) await openManagerLogin();
+  if (!MANAGE_MODE) {
+    await refreshReviewer();
+    updateClock();
+    setInterval(updateClock, 30000);
+    const initial = location.hash.slice(1);
+    navigate(document.getElementById(initial)?.classList.contains("page-section") ? initial : "overview", false);
+    return;
+  }
   await loadRemoteState();
   if (!MANAGE_MODE && !state.roundVisibility[state.round]) {
     state.round = state.roundVisibility[1] ? 1 : 2;
@@ -1176,4 +1188,43 @@ if (labCard) {
   labMotion.addEventListener("change", resetLabTilt);
 }
 
+let reviewerRefreshRunning = false;
+let reviewerLastRefresh = 0;
+async function refreshReviewer() {
+  if (MANAGE_MODE || reviewerRefreshRunning) return;
+  reviewerRefreshRunning = true;
+  const button = document.querySelector("#refreshReviewer");
+  const status = document.querySelector("#reviewerSyncStatus");
+  button.disabled = true;
+  status.textContent = "กำลังตรวจข้อมูลล่าสุดจากระบบ…";
+  try {
+    if (!supabaseClient) throw new Error("เชื่อมต่อระบบไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองอีกครั้ง");
+    const { data, error } = await supabaseClient.from("pa_settings").select("data").eq("id", "portfolio").maybeSingle();
+    if (error) throw error;
+    if (!data?.data) throw new Error("ยังไม่พบข้อมูลแฟ้มที่บันทึกออนไลน์");
+    const uploaded = await getUploadedEvidence();
+    // Do not overwrite an admin session if login completed during this request.
+    if (MANAGE_MODE) return;
+    state = loadState(data.data);
+    evidence = [...uploaded, ...seedEvidence];
+    applyState();
+    if (document.querySelector("#lightbox").open) document.querySelector("#lightbox").close();
+    document.body.classList.remove("reviewer-pending");
+    status.textContent = `ข้อมูลล่าสุดจากระบบ · ${state.round ? `รอบที่ ${state.round}` : "ยังไม่มีรอบเผยแพร่"}`;
+    const profile = await getPublicProfile();
+    if (profile && !MANAGE_MODE) document.querySelector("#profilePhoto").src = profile;
+    reviewerLastRefresh = Date.now();
+  } catch (error) {
+    if (!MANAGE_MODE) {
+      document.body.classList.add("reviewer-pending");
+      status.textContent = `โหลดข้อมูลล่าสุดไม่สำเร็จ: ${error?.message || "กรุณาลองอีกครั้ง"}`;
+    }
+  } finally { button.disabled = false; reviewerRefreshRunning = false; }
+}
+document.querySelector("#refreshReviewer").addEventListener("click", refreshReviewer);
+const refreshOnReturn = () => {
+  if (!document.hidden && !MANAGE_MODE && Date.now() - reviewerLastRefresh > 5000) refreshReviewer();
+};
+window.addEventListener("focus", refreshOnReturn);
+document.addEventListener("visibilitychange", refreshOnReturn);
 init();
